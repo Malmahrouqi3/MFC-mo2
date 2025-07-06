@@ -24,13 +24,23 @@ jobs:
            sudo apt install -y cmake gcc g++ python3 python3-dev hdf5-tools \
                     libfftw3-dev libhdf5-dev openmpi-bin libopenmpi-dev
 
-      - name: Build
-        run:  |
-          /bin/bash mfc.sh test --dry-run --gpu -j $(nproc)
 
+      - name: Set CUDA environment variables
+        run: |
+          echo "/usr/local/cuda/bin" >> $GITHUB_PATH
+          echo "CUDA_HOME=/usr/local/cuda" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+
+      - name: Build (GPU)
+        run: |
+          source /etc/profile
+          export PATH=/usr/local/cuda/bin:$PATH
+          export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+          /bin/bash mfc.sh test --dry-run --gpu -j $(nproc)
+          
       - name: Run Nsight Profiling
         run: |
-          nsys profile -o report ./mfc.sh test --gpu -o HLLD
+          nsys profile -o report ./mfc.sh test --gpu
 
       - name: Process Nsight Profiling Report
         run: |
