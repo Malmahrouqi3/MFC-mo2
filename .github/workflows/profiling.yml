@@ -17,18 +17,26 @@ jobs:
 
       - name: Install NVIDIA HPC SDK
         run: |
-          curl https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA-HPC-SDK | sudo apt-key add -
-          echo "deb https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /" | sudo tee /etc/apt/sources.list.d/nvhpc.list
+          # Install missing dependencies
           sudo apt update
-          sudo apt install nvhpc-23-7
+          sudo apt install -y libncurses5 libtinfo5
+          
+          # Add NVIDIA HPC SDK repository with proper key handling
+          curl -fsSL https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA-HPC-SDK | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-hpc-sdk-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/nvidia-hpc-sdk-keyring.gpg] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /" | sudo tee /etc/apt/sources.list.d/nvhpc.list
+          
+          sudo apt update
+          sudo apt install -y nvhpc-23-7
           
       - name: Install Nsight Systems
         run: |
-          sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
-          sudo add-apt-repository "deb https://developer.download.nvidia.com/devtools/repos/ubuntu$(source /etc/lsb-release; echo "$DISTRIB_RELEASE" | tr -d .)/$(dpkg --print-architecture)/ /"
-          sudo apt update
-          sudo apt install nsight-systems
+          # Use proper key handling for CUDA repository
+          wget -qO - https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub | sudo gpg --dearmor -o /usr/share/keyrings/cuda-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/cuda-keyring.gpg] https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64 /" | sudo tee /etc/apt/sources.list.d/cuda.list
           
+          sudo apt update
+          sudo apt install -y nsight-systems-cli
+                    
       - name: Install CUDA
         uses: Jimver/cuda-toolkit@v0.2.24
         env:
