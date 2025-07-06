@@ -9,6 +9,12 @@ jobs:
       - name: Clone
         uses: actions/checkout@v4
 
+      - name: Install NVIDIA HPC SDK
+        run: |
+          wget https://developer.download.nvidia.com/hpc-sdk/23.7/nvhpc_2023_237_Linux_x86_64_cuda_12.2.tar.gz
+          tar xpzf nvhpc_2023_237_Linux_x86_64_cuda_12.2.tar.gz
+          sudo nvhpc_2023_237_Linux_x86_64_cuda_12.2/install
+
       - name: Install CUDA
         uses: Jimver/cuda-toolkit@v0.2.24
         env:
@@ -21,23 +27,30 @@ jobs:
       - name: Setup Ubuntu
         run: |
            sudo apt update -y
-           sudo apt install -y cmake gcc g++ python3 python3-dev hdf5-tools \
+           sudo apt install -y cmake python3 python3-dev hdf5-tools \
                     libfftw3-dev libhdf5-dev openmpi-bin libopenmpi-dev
 
 
       - name: Set CUDA environment variables
         run: |
           echo "/usr/local/cuda/bin" >> $GITHUB_PATH
+          echo "/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/compilers/bin" >> $GITHUB_PATH
           echo "CUDA_HOME=/usr/local/cuda" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "CC=nvc" >> $GITHUB_ENV
+          echo "CXX=nvc++" >> $GITHUB_ENV
+          echo "FC=nvfortran" >> $GITHUB_ENV
 
       - name: Build (GPU)
         run: |
-          source /etc/profile
-          export PATH=/usr/local/cuda/bin:$PATH
+          export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/compilers/bin:/usr/local/cuda/bin:$PATH
           export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+          export CC=nvc
+          export CXX=nvc++
+          export FC=nvfortran
+          rm -rf build/
           /bin/bash mfc.sh test --dry-run --gpu -j $(nproc)
-          
+
       - name: Run Nsight Profiling
         run: |
           nsys profile -o report ./mfc.sh test --gpu
