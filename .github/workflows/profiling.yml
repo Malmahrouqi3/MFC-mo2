@@ -22,7 +22,6 @@ jobs:
             libfftw3-dev libhdf5-dev openmpi-bin libopenmpi-dev \
             gfortran libegl1 libopengl0 \
             libxcb-xinput0 libxcb-cursor0 \
-            libxcb-xinerama0 libxcb-icccm4 libxcb-keysyms1 \
             libxcb-shape0 libxkbcommon-x11-0
 
       - name: Install Nsight Systems
