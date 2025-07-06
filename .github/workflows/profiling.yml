@@ -15,55 +15,34 @@ jobs:
       #     tar xpzf nvhpc_2023_237_Linux_x86_64_cuda_12.2.tar.gz
       #     sudo nvhpc_2023_237_Linux_x86_64_cuda_12.2/install
 
-      - name: Install NVIDIA HPC SDK
+      - name: Install system dependencies
         run: |
-          sudo apt update
-          sudo apt install -y libncurses6 libncurses6-dev libtinfo6
-          # Symlink for compatibility with software expecting libncurses5/tinfo5
-          sudo ln -sf /usr/lib/x86_64-linux-gnu/libncurses.so.6 /usr/lib/x86_64-linux-gnu/libncurses.so.5 || true
-          sudo ln -sf /usr/lib/x86_64-linux-gnu/libtinfo.so.6 /usr/lib/x86_64-linux-gnu/libtinfo.so.5 || true
+          sudo apt update -y
+          sudo apt install -y cmake python3 python3-dev hdf5-tools \
+                    libfftw3-dev libhdf5-dev openmpi-bin libopenmpi-dev \
+                    gcc g++ gfortran
 
-          # Add NVIDIA HPC SDK repository with proper key handling
-          curl -fsSL https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA-HPC-SDK | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-hpc-sdk-keyring.gpg
-          echo "deb [signed-by=/usr/share/keyrings/nvidia-hpc-sdk-keyring.gpg] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /" | sudo tee /etc/apt/sources.list.d/nvhpc.list
-
-          sudo apt update
-          sudo apt install -y nvhpc-23-7 || sudo apt install -y nvhpc-23-7 --fix-missing
-    
       - name: Install Nsight Systems
         run: |
-          # Use proper key handling for CUDA repository
-          wget -qO - https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub | sudo gpg --dearmor -o /usr/share/keyrings/cuda-keyring.gpg
-          echo "deb [signed-by=/usr/share/keyrings/cuda-keyring.gpg] https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64 /" | sudo tee /etc/apt/sources.list.d/cuda.list
+          wget -O nsight-systems.deb https://developer.download.nvidia.com/devtools/repos/ubuntu2004/amd64/nsight-systems-cli-2023.3.3_2023.3.3.2-1_amd64.deb
+          sudo dpkg -i nsight-systems.deb
+          sudo apt-get install -f
           
-          sudo apt update
-          sudo apt install -y nsight-systems-cli
-                    
       - name: Install CUDA
         uses: Jimver/cuda-toolkit@v0.2.24
-        env:
-          CC: nvc
-          CXX: nvc++
         with:
           cuda: '11.8.0'
-          linux-local-args: '["--toolkit", "--samples", "--override"]'
+          method: 'network'
+          sub-packages: '["nvcc", "cuda-libraries-dev"]'
 
-      - name: Setup Ubuntu
-        run: |
-           sudo apt update -y
-           sudo apt install -y cmake python3 python3-dev hdf5-tools \
-                    libfftw3-dev libhdf5-dev openmpi-bin libopenmpi-dev
-
-
-      - name: Set CUDA environment variables
+      - name: Set environment variables
         run: |
           echo "/usr/local/cuda/bin" >> $GITHUB_PATH
-          echo "/opt/nvidia/hpc_sdk/Linux_x86_64/23.7/compilers/bin" >> $GITHUB_PATH
           echo "CUDA_HOME=/usr/local/cuda" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH" >> $GITHUB_ENV
-          echo "CC=nvc" >> $GITHUB_ENV
-          echo "CXX=nvc++" >> $GITHUB_ENV
-          echo "FC=nvfortran" >> $GITHUB_ENV
+          echo "CC=gcc" >> $GITHUB_ENV
+          echo "CXX=g++" >> $GITHUB_ENV
+          echo "FC=gfortran" >> $GITHUB_ENV
 
       - name: Build (GPU)
         run: |
