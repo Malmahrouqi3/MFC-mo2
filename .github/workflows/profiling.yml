@@ -17,24 +17,19 @@ jobs:
 
       - name: Install NVIDIA HPC SDK
         run: |
-          # Install missing dependencies for Ubuntu 22.04
           sudo apt update
-          sudo apt install -y libncurses5 libncurses5-dev libncursesw5 libtinfo5
-          
-          # If above fails, try alternatives
-          sudo apt install -y libncurses6 libncurses6-dev libtinfo6 || true
-          
-          # Create symlinks for compatibility
+          sudo apt install -y libncurses6 libncurses6-dev libtinfo6
+          # Symlink for compatibility with software expecting libncurses5/tinfo5
           sudo ln -sf /usr/lib/x86_64-linux-gnu/libncurses.so.6 /usr/lib/x86_64-linux-gnu/libncurses.so.5 || true
           sudo ln -sf /usr/lib/x86_64-linux-gnu/libtinfo.so.6 /usr/lib/x86_64-linux-gnu/libtinfo.so.5 || true
-          
+
           # Add NVIDIA HPC SDK repository with proper key handling
           curl -fsSL https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA-HPC-SDK | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-hpc-sdk-keyring.gpg
           echo "deb [signed-by=/usr/share/keyrings/nvidia-hpc-sdk-keyring.gpg] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /" | sudo tee /etc/apt/sources.list.d/nvhpc.list
-          
+
           sudo apt update
           sudo apt install -y nvhpc-23-7 || sudo apt install -y nvhpc-23-7 --fix-missing
-                    
+    
       - name: Install Nsight Systems
         run: |
           # Use proper key handling for CUDA repository
