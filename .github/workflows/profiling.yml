@@ -22,8 +22,9 @@ jobs:
             libfftw3-dev libhdf5-dev openmpi-bin libopenmpi-dev \
             gfortran libegl1 libopengl0 \
             libxcb-xinput0 libxcb-cursor0 \
-            libxcb-shape0 libxkbcommon-x11-0
-
+            libxcb-shape0 libxkbcommon-x11-0 \
+            libxcb-xinerama0 libxcb-icccm4 libxcb-keysyms1
+            
       - name: Install Nsight Systems
         run: |
           wget -O nsight-systems.deb https://developer.download.nvidia.com/devtools/repos/ubuntu2004/amd64/nsight-systems-2025.3.1_2025.3.1.90-1_amd64.deb
