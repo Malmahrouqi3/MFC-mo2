@@ -25,21 +25,17 @@ jobs:
           run: |
             #!/bin/bash
             set -e
-            cd $(dirname $0)
 
-            # print system info
-            id -a
-            df -h
-            mount
-            env
+            echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+            echo "Listing $GITHUB_WORKSPACE/.github/workflows/"
+            ls -la $GITHUB_WORKSPACE/.github/workflows/
 
-            # build
             sudo mkdir -p /mnt/share
             sudo chmod 777 /mnt/share
 
             docker run --rm \
                 -v /mnt/share:/mnt/share:rw \
-                -v $(pwd)/.github/workflows:/mnt/scripts \
+                -v $GITHUB_WORKSPACE/.github/workflows:/mnt/scripts \
                 nvidia/cuda:12.4.1-devel-ubuntu22.04 \
                 bash /mnt/scripts/cp2k-build.sh
             df -h
