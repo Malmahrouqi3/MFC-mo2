@@ -38,9 +38,10 @@ jobs:
             sudo chmod 777 /mnt/share
 
             docker run --rm \
+                --entrypoint /mnt/scripts/cp2k-build.sh \
                 -v /mnt/share:/mnt/share:rw \
                 -v $(pwd)/.github/workflows:/mnt/scripts \
-                nvidia/cuda:12.4.1-devel-ubuntu22.04 /mnt/scripts/cp2k-build.sh
+                nvidia/cuda:12.4.1-devel-ubuntu22.04
             df -h
 
             # install
