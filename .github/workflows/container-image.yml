@@ -29,6 +29,7 @@ jobs:
             # build
             sudo mkdir -p /mnt/share
             sudo chmod 777 /mnt/share
+            cp path/to/cp2k-build.sh /mnt/scripts/
 
             docker run --rm \
                 -v /mnt/share:/mnt/share:rw \
