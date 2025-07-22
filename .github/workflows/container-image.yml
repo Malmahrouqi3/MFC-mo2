@@ -8,6 +8,9 @@ jobs:
     name: Build Singularity Images
     runs-on: ubuntu-latest
     steps:
+        - name: Checkout repository
+          uses: actions/checkout@v4
+
         - name: run commands
           run: |
             #!/bin/bash
