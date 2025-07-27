@@ -35,8 +35,10 @@ jobs:
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
           sudo rm -rf /usr/local/share/boost /usr/lib/jvm
           sudo rm -rf /opt/hostedtoolcache /home/runner/.cache
-          sudo apt-get clean
           sudo rm -rf /var/lib/apt/lists/*
+          sudo apt-get clean
+          sudo rm -rf /tmp/*
+          sudo rm -rf /home/runner/work/_temp
           df -h
           mkdir -p /tmp/mfc_build
           cp -r mfc/* /tmp/mfc_build/
