@@ -1,0 +1,36 @@
+name: Build MFC Containers
+
+on: [push, pull_request]
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        config:
+          - { name: 'cpu',         base_image: 'ubuntu:22.04',      bench: false }
+          - { name: 'gpu',         base_image: 'nvidia/cuda:12.1.0-base-ubuntu22.04', bench: false }
+          - { name: 'cpu_bench',   base_image: 'ubuntu:22.04',      bench: true }
+          - { name: 'gpu_bench',   base_image: 'nvidia/cuda:12.1.0-base-ubuntu22.04', bench: true }
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: mfc
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./mfc
+          file: ./mfc/.github/Dockerfile
+          build-args: |
+            BASE_IMAGE=${{ matrix.config.base_image }}
+          tags: my-org/mfc:${{ matrix.config.name }}
+          load: true
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
