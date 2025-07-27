@@ -8,10 +8,10 @@ jobs:
     strategy:
       matrix:
         config:
-          - { name: 'cpu',         base_image: 'ubuntu:22.04',      bench: false }
+          # - { name: 'cpu',         base_image: 'ubuntu:22.04',      bench: false }
           - { name: 'gpu',         base_image: 'nvcr.io/nvidia/nvhpc:25.5-devel-cuda12.9-ubuntu24.04', bench: false }
-          - { name: 'cpu_bench',   base_image: 'ubuntu:22.04',      bench: true }
-          - { name: 'gpu_bench',   base_image: 'nvcr.io/nvidia/nvhpc:25.5-devel-cuda12.9-ubuntu24.04', bench: true }
+          # - { name: 'cpu_bench',   base_image: 'ubuntu:22.04',      bench: true }
+          # - { name: 'gpu_bench',   base_image: 'nvcr.io/nvidia/nvhpc:25.5-devel-cuda12.9-ubuntu24.04', bench: true }
 
     steps:
       - name: Clone

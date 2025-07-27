@@ -41,6 +41,9 @@ RUN if [ "$BENCH" = "true" ] && echo "$BASE_IMAGE" | grep -q "nvidia"; then \
 RUN cd /opt/MFC && \
     rm -rf build && \
     if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
+      export CC=gcc && \
+      export CXX=g++ && \
+      export FC=gfortran && \
       ./mfc.sh build --mpi --gpu -j $(nproc) && \
       ./mfc.sh test --dry-run --gpu -j $(nproc); \
     else \
