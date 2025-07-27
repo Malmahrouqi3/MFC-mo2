@@ -24,24 +24,24 @@ RUN if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
       export LD_LIBRARY_PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib:$LD_LIBRARY_PATH"; \
     fi
 
-ARG BENCH
-RUN if [ "$BENCH" = "true" ] && ! echo "$BASE_IMAGE" | grep -q "nvidia"; then \
-      apt-get install -y --no-install-recommends libatlas-base-dev mpich libmpich-dev gfortran && \
-      wget https://www.netlib.org/benchmark/hpl/hpl-2.3.tar.gz && \
-      tar -xzvf hpl-2.3.tar.gz && \
-      mv hpl-2.3 hpl; \
-    fi
+# ARG BENCH
+# RUN if [ "$BENCH" = "true" ] && ! echo "$BASE_IMAGE" | grep -q "nvidia"; then \
+#       apt-get install -y --no-install-recommends libatlas-base-dev mpich libmpich-dev gfortran && \
+#       wget https://www.netlib.org/benchmark/hpl/hpl-2.3.tar.gz && \
+#       tar -xzvf hpl-2.3.tar.gz && \
+#       mv hpl-2.3 hpl; \
+#     fi
 
-RUN if [ "$BENCH" = "true" ] && echo "$BASE_IMAGE" | grep -q "nvidia"; then \
-      wget https://developer.download.nvidia.com/compute/nvidia-hpc-benchmarks/25.04/local_installers/nvidia-hpc-benchmarks-local-repo-ubuntu2404-25.04_1.0-1_amd64.deb -O /tmp/nvidia-hpc-benchmarks.deb && \
-      dpkg -i /tmp/nvidia-hpc-benchmarks.deb && \
-      cp /var/nvidia-hpc-benchmarks-local-repo-ubuntu2404-25.04/nvidia-hpc-benchmarks-*-keyring.gpg /usr/share/keyrings/; \
-    fi
+# RUN if [ "$BENCH" = "true" ] && echo "$BASE_IMAGE" | grep -q "nvidia"; then \
+#       wget https://developer.download.nvidia.com/compute/nvidia-hpc-benchmarks/25.04/local_installers/nvidia-hpc-benchmarks-local-repo-ubuntu2404-25.04_1.0-1_amd64.deb -O /tmp/nvidia-hpc-benchmarks.deb && \
+#       dpkg -i /tmp/nvidia-hpc-benchmarks.deb && \
+#       cp /var/nvidia-hpc-benchmarks-local-repo-ubuntu2404-25.04/nvidia-hpc-benchmarks-*-keyring.gpg /usr/share/keyrings/; \
+#     fi
 
 RUN cd /opt/MFC && \
     rm -rf build && \
     if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
-      export CC=gcc && \
+    export CC=gcc && \
       export CXX=g++ && \
       export FC=gfortran && \
       ./mfc.sh build --mpi --gpu -j $(nproc) && \
