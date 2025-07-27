@@ -10,10 +10,12 @@ ENV PATH="/opt/MFC:$PATH"
 
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update -y && \
-    apt-get install -y --no-install-recommends \
-        build-essential git tar wget make cmake gcc g++ \
+    apt-get install -y \
+        build-essential git make cmake gcc g++ \
         python3 python3-venv python3-pip \
-        openmpi-bin libopenmpi-dev libfftw3-dev
+        openmpi-bin libopenmpi-dev libfftw3-dev \
+        libatlas-base-dev mpich libmpich-dev gfortran
+
 
 ARG BASE_IMAGE
 RUN if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
