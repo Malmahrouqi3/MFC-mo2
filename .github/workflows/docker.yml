@@ -9,7 +9,7 @@ jobs:
       matrix:
         config:
           # - { name: 'cpu',         base_image: 'ubuntu:22.04',      bench: false }
-          - { name: 'gpu',         base_image: 'nvcr.io/nvidia/nvhpc:25.5-devel-cuda12.9-ubuntu24.04', bench: false }
+          - { name: 'gpu',         base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04', bench: false }
           # - { name: 'cpu_bench',   base_image: 'ubuntu:22.04',      bench: true }
           # - { name: 'gpu_bench',   base_image: 'nvcr.io/nvidia/nvhpc:25.5-devel-cuda12.9-ubuntu24.04', bench: true }
       max-parallel: 1
