@@ -50,4 +50,4 @@ RUN cd /opt/MFC && \
       ./mfc.sh test --dry-run -j $(nproc); \
     fi
 
-ENTRYPOINT ["/bin/bash", "-c", "mkdir -p /tmp/mfc_build && cd /opt/MFC && exec ./mfc.sh \"$@\" --build-dir=\"/tmp/mfc_build\""]
+ENTRYPOINT ["/bin/bash", "-c", "mkdir -p /tmp/mfc_build && cd /opt/MFC && exec ./mfc.sh \"$@\""]
