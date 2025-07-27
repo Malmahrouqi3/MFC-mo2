@@ -2,20 +2,18 @@ ARG BASE_IMAGE=ubuntu:22.04
 ARG BENCH=false
 FROM ${BASE_IMAGE}
 
-COPY ../../ /opt/MFC
+COPY ../ /opt/MFC
 
 ENV OMPI_ALLOW_RUN_AS_ROOT=1
 ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 ENV PATH="/opt/MFC:$PATH"
 
-RUN export DEBIAN_FRONTEND=noninteractive && \
-    apt-get update -y && \
+RUN apt-get update -y && \
     apt-get install -y \
         build-essential git make cmake gcc g++ \
         python3 python3-venv python3-pip \
         openmpi-bin libopenmpi-dev libfftw3-dev \
         libatlas-base-dev mpich libmpich-dev gfortran
-
 
 ARG BASE_IMAGE
 RUN if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
@@ -50,4 +48,5 @@ RUN cd /opt/MFC && \
       ./mfc.sh test --dry-run -j $(nproc); \
     fi
 
-ENTRYPOINT ["/bin/bash", "-c", "mkdir -p /tmp/mfc_build && cd /opt/MFC && exec ./mfc.sh \"$@\""]
+WORKDIR /opt/MFC
+ENTRYPOINT ["/bin/bash"]
