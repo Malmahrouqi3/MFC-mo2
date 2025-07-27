@@ -41,16 +41,16 @@ RUN if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
 RUN cd /opt/MFC && rm -rf build
 RUN cd /opt/MFC && \
     if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
-      ./mfc.sh build --mpi --gpu -j 2; \
+      ./mfc.sh build --mpi --gpu -j 1; \
     else \
-      ./mfc.sh build -j 2; \
+      ./mfc.sh build -j 1; \
     fi
 RUN cd /opt/MFC && \
     if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
-      ./mfc.sh test --dry-run --gpu -j 2; \
+      ./mfc.sh test --dry-run --gpu -j 1; \
     else \
-      ./mfc.sh test --dry-run -j 2; \
+      ./mfc.sh test --dry-run -j 1; \
     fi
-    
+
 WORKDIR /opt/MFC
 ENTRYPOINT ["/bin/bash"]
