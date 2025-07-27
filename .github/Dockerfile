@@ -38,18 +38,19 @@ RUN if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
 #       cp /var/nvidia-hpc-benchmarks-local-repo-ubuntu2404-25.04/nvidia-hpc-benchmarks-*-keyring.gpg /usr/share/keyrings/; \
 #     fi
 
+RUN cd /opt/MFC && rm -rf build
 RUN cd /opt/MFC && \
-    rm -rf build && \
     if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
-    export CC=gcc && \
-      export CXX=g++ && \
-      export FC=gfortran && \
-      ./mfc.sh build --mpi --gpu -j $(nproc) && \
-      ./mfc.sh test --dry-run --gpu -j $(nproc); \
+      ./mfc.sh build --mpi --gpu -j 2; \
     else \
-      ./mfc.sh build -j $(nproc) && \
-      ./mfc.sh test --dry-run -j $(nproc); \
+      ./mfc.sh build -j 2; \
     fi
-
+RUN cd /opt/MFC && \
+    if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
+      ./mfc.sh test --dry-run --gpu -j 2; \
+    else \
+      ./mfc.sh test --dry-run -j 2; \
+    fi
+    
 WORKDIR /opt/MFC
 ENTRYPOINT ["/bin/bash"]

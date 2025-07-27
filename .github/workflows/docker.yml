@@ -13,7 +13,7 @@ jobs:
           # - { name: 'cpu_bench',   base_image: 'ubuntu:22.04',      bench: true }
           # - { name: 'gpu_bench',   base_image: 'nvcr.io/nvidia/nvhpc:25.5-devel-cuda12.9-ubuntu24.04', bench: true }
       max-parallel: 1
-
+      
     steps:
       - name: Clone
         uses: actions/checkout@v4
@@ -52,5 +52,5 @@ jobs:
           tags: mohdsaid497566/mfc:${{ matrix.config.name }}
           load: true
           push: true
-          cache-from: type=registry,ref=mohdsaid497566/mfc-cache:buildcache
-          cache-to: type=registry,ref=mohdsaid497566/mfc-cache:buildcache,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
