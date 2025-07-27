@@ -30,9 +30,13 @@ jobs:
         
       - name: Stage
         run: |
+          sudo docker system prune -af || true
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo rm -rf /usr/local/share/boost /usr/lib/jvm
+          sudo rm -rf /opt/hostedtoolcache /home/runner/.cache
           sudo apt-get clean
-          sudo rm -rf /tmp/* /var/lib/apt/lists/* /opt/hostedtoolcache /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/share/boost /usr/lib/jvm /home/runner/.cache /home/runner/work/_temp
-          docker system prune -af || true
+          sudo rm -rf /var/lib/apt/lists/*
+          df -h
           mkdir -p /tmp/mfc_build
           cp -r mfc/* /tmp/mfc_build/
           cp mfc/.github/Dockerfile /tmp/mfc_build/
