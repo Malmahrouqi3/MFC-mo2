@@ -28,8 +28,8 @@ ENV \
   CC=nvc \
   CXX=nvc++ \
   FC=nvfortran \
-  PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/25.7/compilers/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/25.7/comm_libs/openmpi4/bin:$PATH" \
-  LD_LIBRARY_PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/25.7/compilers/lib:/opt/nvidia/hpc_sdk/Linux_x86_64/25.7/comm_libs/openmpi4/lib:$LD_LIBRARY_PATH"  
+  PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/23.11/comm_libs/openmpi4/bin:$PATH" \
+  LD_LIBRARY_PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/23.11/compilers/lib:/opt/nvidia/hpc_sdk/Linux_x86_64/23.11/comm_libs/openmpi4/lib:$LD_LIBRARY_PATH"
 
 RUN free -h && df -h
 RUN cd /opt/MFC && rm -rf build
