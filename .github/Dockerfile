@@ -31,9 +31,8 @@ ENV \
   CC=nvc \
   CXX=nvc++ \
   FC=nvfortran \
-  PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin:$PATH" \
-  LD_LIBRARY_PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib:$LD_LIBRARY_PATH"
-
+  PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/25.7/compilers/bin:$PATH" \
+  LD_LIBRARY_PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/25.7/compilers/lib:$LD_LIBRARY_PATH"
   
 RUN free -h && df -h
 RUN cd /opt/MFC && rm -rf build
