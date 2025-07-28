@@ -53,6 +53,9 @@ RUN cd /opt/MFC && \
     else \
       ./mfc.sh test --dry-run; \
     fi
+
+RUN rm -rf /var/lib/apt/lists/*
 RUN free -h && df -h
+
 WORKDIR /opt/MFC
 ENTRYPOINT ["/bin/bash"]

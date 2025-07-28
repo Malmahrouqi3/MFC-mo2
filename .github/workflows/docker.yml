@@ -39,6 +39,11 @@ jobs:
           sudo apt-get clean
           sudo rm -rf /tmp/*
           sudo rm -rf /home/runner/work/_temp
+          sudo rm -rf /home/runner/.npm /home/runner/.cargo /home/runner/.rustup
+          sudo rm -rf /usr/local/share/edge_driver /usr/local/share/chromium
+          sudo rm -rf /usr/local/share/powershell /usr/local/share/swift
+          sudo rm -rf /usr/local/share/vcpkg
+          sudo rm -rf /usr/share/swift
           df -h
           sudo mkdir -p /mnt/share
           sudo chmod 777 /mnt/share
