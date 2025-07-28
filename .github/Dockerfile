@@ -5,7 +5,7 @@ FROM ${BASE_IMAGE}
 RUN apt-get update -y && \
     apt-get install -y \
         build-essential git make cmake gcc g++ gfortran \
-        python3 python3-venv python3-pip \
+        python3 python3-venv python3-pip curl \
         openmpi-bin libopenmpi-dev libfftw3-dev \
         libatlas-base-dev mpich libmpich-dev && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
