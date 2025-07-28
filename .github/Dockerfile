@@ -40,20 +40,22 @@ RUN if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
 #       dpkg -i /tmp/nvidia-hpc-benchmarks.deb && \
 #       cp /var/nvidia-hpc-benchmarks-local-repo-ubuntu2404-25.04/nvidia-hpc-benchmarks-*-keyring.gpg /usr/share/keyrings/; \
 #     fi
-
+RUN free -h && df -h
 RUN cd /opt/MFC && rm -rf build
+RUN free -h && df -h
 RUN cd /opt/MFC && \
     if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
-      ./mfc.sh build --mpi --gpu; \
+      ./mfc.sh build --mpi --gpu -j 1; \
     else \
-      ./mfc.sh build; \
+      ./mfc.sh build -j 1; \
     fi
+RUN free -h && df -h
 RUN cd /opt/MFC && \
     if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
       ./mfc.sh test --dry-run --gpu; \
     else \
       ./mfc.sh test --dry-run; \
     fi
-
+RUN free -h && df -h
 WORKDIR /opt/MFC
 ENTRYPOINT ["/bin/bash"]
