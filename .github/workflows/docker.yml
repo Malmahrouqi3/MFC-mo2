@@ -40,15 +40,15 @@ jobs:
           sudo rm -rf /tmp/*
           sudo rm -rf /home/runner/work/_temp
           df -h
-          mkdir -p /tmp/mfc_build
-          cp -r mfc/* /tmp/mfc_build/
-          cp mfc/.github/Dockerfile /tmp/mfc_build/
+          mkdir -p /mnt/share
+          cp -r mfc/* /mnt/share/
+          cp mfc/.github/Dockerfile /mnt/share/
 
       - name: Build and Deploy
         uses: docker/build-push-action@v5
         with:
-          context: /tmp/mfc_build
-          file: /tmp/mfc_build/Dockerfile
+          context: /mnt/share
+          file: /mnt/share/Dockerfile
           build-args: |
             BASE_IMAGE=${{ matrix.config.base_image }}
           tags: mohdsaid497566/mfc:${{ matrix.config.name }}
