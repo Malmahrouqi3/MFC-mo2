@@ -32,6 +32,10 @@ jobs:
       - name: Stage
         run: |
           sudo docker system prune -af || true
+          sudo docker image prune -af || true
+          sudo docker builder prune -af || true
+          sudo rm -rf /var/lib/docker/*
+          sudo rm -rf /var/lib/containerd/*
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
           sudo rm -rf /usr/local/share/boost /usr/lib/jvm
           sudo rm -rf /opt/hostedtoolcache /home/runner/.cache
