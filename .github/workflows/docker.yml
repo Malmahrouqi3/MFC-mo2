@@ -42,8 +42,8 @@ jobs:
           df -h
           sudo mkdir -p /mnt/share
           sudo chmod 777 /mnt/share
-          cp -r mfc/* /mnt/share/
-          cp mfc/.github/Dockerfile /mnt/share/
+          cp -r mfc/* /mnt/share/ || { echo "Failed to copy mfc/*"; exit 1; }
+          cp mfc/.github/Dockerfile /mnt/share/ || { echo "Failed to copy Dockerfile"; exit 1; }
 
       - name: Build and Deploy
         uses: docker/build-push-action@v5
