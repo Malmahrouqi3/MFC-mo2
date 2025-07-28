@@ -20,7 +20,7 @@ COPY ../ /opt/MFC
 RUN curl https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA-HPC-SDK | gpg --dearmor -o /usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg && \
     echo 'deb [signed-by=/usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /' | tee /etc/apt/sources.list.d/nvhpc.list && \
     apt-get update -y && \
-    apt-get install -y nvhpc-25-7-cuda-multi
+    apt-get install -y nvhpc-23-11-cuda-multi
  
 RUN ls -lR /opt/nvidia/hpc_sdk/Linux_x86_64/
 
