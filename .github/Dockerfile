@@ -2,18 +2,21 @@ ARG BASE_IMAGE=ubuntu:22.04
 ARG BENCH=false
 FROM ${BASE_IMAGE}
 
-COPY ../ /opt/MFC
-
-ENV OMPI_ALLOW_RUN_AS_ROOT=1
-ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
-ENV PATH="/opt/MFC:$PATH"
-
 RUN apt-get update -y && \
     apt-get install -y \
         build-essential git make cmake gcc g++ \
         python3 python3-venv python3-pip \
         openmpi-bin libopenmpi-dev libfftw3-dev \
-        libatlas-base-dev mpich libmpich-dev gfortran
+        libatlas-base-dev mpich libmpich-dev gfortran && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+ENV OMPI_ALLOW_RUN_AS_ROOT=1
+ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+ENV PATH="/opt/MFC:$PATH"
+ENV MAKEFLAGS="-j1"
+ENV CMAKE_BUILD_PARALLEL_LEVEL=1
+
+COPY ../ /opt/MFC
 
 ARG BASE_IMAGE
 RUN if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
@@ -41,15 +44,15 @@ RUN if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
 RUN cd /opt/MFC && rm -rf build
 RUN cd /opt/MFC && \
     if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
-      ./mfc.sh build --mpi --gpu -j 1; \
+      ./mfc.sh build --mpi --gpu; \
     else \
-      ./mfc.sh build -j 1; \
+      ./mfc.sh build; \
     fi
 RUN cd /opt/MFC && \
     if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
-      ./mfc.sh test --dry-run --gpu -j 1; \
+      ./mfc.sh test --dry-run --gpu; \
     else \
-      ./mfc.sh test --dry-run -j 1; \
+      ./mfc.sh test --dry-run; \
     fi
 
 WORKDIR /opt/MFC
