@@ -22,8 +22,6 @@ RUN curl https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA
     echo 'deb [signed-by=/usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /' | tee /etc/apt/sources.list.d/nvhpc.list && \
     apt-get update -y && \
     apt-get install -y nvhpc-25-7-cuda-multi
-    export PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin:$PATH" && \
-    export LD_LIBRARY_PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib:$LD_LIBRARY_PATH"
 
 ENV \
   CC=nvc \
