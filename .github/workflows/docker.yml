@@ -40,7 +40,8 @@ jobs:
           sudo rm -rf /tmp/*
           sudo rm -rf /home/runner/work/_temp
           df -h
-          mkdir -p /mnt/share
+          sudo mkdir -p /mnt/share
+          sudo chmod 777 /mnt/share
           cp -r mfc/* /mnt/share/
           cp mfc/.github/Dockerfile /mnt/share/
 
