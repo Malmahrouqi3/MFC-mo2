@@ -25,8 +25,6 @@ RUN curl https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA
  
 RUN ls -lR /opt/nvidia/hpc_sdk/Linux_x86_64/
 
-RUN which nvc && which nvc++ && which nvfortran
-
 ENV \
   CC=nvc \
   CXX=nvc++ \
