@@ -8,8 +8,8 @@ jobs:
     strategy:
       matrix:
         config:
-          - { name: 'cpu',         base_image: 'ubuntu:22.04',      bench: false }
-          - { name: 'gpu',         base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04', bench: false }
+          # - { name: 'cpu',         base_image: 'ubuntu:22.04',      bench: false }
+          - { name: 'gpu',         base_image: 'ubuntu:22.04', bench: false }
           # - { name: 'cpu_bench',   base_image: 'ubuntu:22.04',      bench: true }
           # - { name: 'gpu_bench',   base_image: 'nvcr.io/nvidia/nvhpc:25.5-devel-cuda12.9-ubuntu24.04', bench: true }
       max-parallel: 1
@@ -70,11 +70,11 @@ jobs:
           file: /mnt/share/Dockerfile
           build-args: |
             BASE_IMAGE=${{ matrix.config.base_image }}
-            CC_COMPILER=${{ contains(matrix.config.base_image, 'nvidia') && 'nvc' || 'gcc' }}
-            CXX_COMPILER=${{ contains(matrix.config.base_image, 'nvidia') && 'nvc++' || 'g++' }}
-            FC_COMPILER=${{ contains(matrix.config.base_image, 'nvidia') && 'nvfortran' || 'gfortran' }}
-            COMPILER_PATH=${{ contains(matrix.config.base_image, 'nvidia') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin' || '/usr/bin' }}
-            COMPILER_LD_LIBRARY_PATH=${{ contains(matrix.config.base_image, 'nvidia') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib' || '/usr/lib' }}
+            CC_COMPILER=nvc
+            CXX_COMPILER=nvc++
+            FC_COMPILER=nvfortran
+            COMPILER_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin
+            COMPILER_LD_LIBRARY_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib
           tags: mohdsaid497566/mfc:${{ matrix.config.name }}
           load: true
           push: true

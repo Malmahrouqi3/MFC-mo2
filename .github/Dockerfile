@@ -18,11 +18,16 @@ ENV CMAKE_BUILD_PARALLEL_LEVEL=1
 
 COPY ../ /opt/MFC
 
-ARG CC_COMPILER=gcc
-ARG CXX_COMPILER=g++
-ARG FC_COMPILER=gfortran
-ARG COMPILER_PATH=/usr/bin
-ARG COMPILER_LD_LIBRARY_PATH=/usr/lib
+RUN curl https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA-HPC-SDK | gpg --dearmor -o /usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg && \
+    echo 'deb [signed-by=/usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /' | tee /etc/apt/sources.list.d/nvhpc.list && \
+    apt-get update -y && \
+    apt-get install -y nvhpc-25-7-cuda-multi
+
+ARG CC_COMPILER=nvc
+ARG CXX_COMPILER=nvc++
+ARG FC_COMPILER=nvfortran
+ARG COMPILER_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin
+ARG COMPILER_LD_LIBRARY_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib
 
 ENV CC=${CC_COMPILER}
 ENV CXX=${CXX_COMPILER}
@@ -30,35 +35,13 @@ ENV FC=${FC_COMPILER}
 ENV PATH="${COMPILER_PATH}:$PATH"
 ENV LD_LIBRARY_PATH="${COMPILER_LD_LIBRARY_PATH}:$LD_LIBRARY_PATH"
 
-# ARG BENCH
-# RUN if [ "$BENCH" = "true" ] && ! echo "$BASE_IMAGE" | grep -q "nvidia"; then \
-#       apt-get install -y --no-install-recommends libatlas-base-dev mpich libmpich-dev gfortran && \
-#       wget https://www.netlib.org/benchmark/hpl/hpl-2.3.tar.gz && \
-#       tar -xzvf hpl-2.3.tar.gz && \
-#       mv hpl-2.3 hpl; \
-#     fi
-
-# RUN if [ "$BENCH" = "true" ] && echo "$BASE_IMAGE" | grep -q "nvidia"; then \
-#       wget https://developer.download.nvidia.com/compute/nvidia-hpc-benchmarks/25.04/local_installers/nvidia-hpc-benchmarks-local-repo-ubuntu2404-25.04_1.0-1_amd64.deb -O /tmp/nvidia-hpc-benchmarks.deb && \
-#       dpkg -i /tmp/nvidia-hpc-benchmarks.deb && \
-#       cp /var/nvidia-hpc-benchmarks-local-repo-ubuntu2404-25.04/nvidia-hpc-benchmarks-*-keyring.gpg /usr/share/keyrings/; \
-#     fi
 RUN free -h && df -h
 RUN cd /opt/MFC && rm -rf build
 RUN free -h && df -h
 RUN cd /opt/MFC && \
-    if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
-      ./mfc.sh build --mpi --gpu -j 1; \
-    else \
-      ./mfc.sh build -j 1; \
-    fi
-RUN free -h && df -h
-RUN cd /opt/MFC && \
-    if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
-      ./mfc.sh test --dry-run --gpu; \
-    else \
-      ./mfc.sh test --dry-run; \
-    fi
+    rm -rf build && \
+    ./mfc.sh build --mpi --gpu -j 1 && \
+    ./mfc.sh test --dry-run --gpu
 
 RUN rm -rf /var/lib/apt/lists/*
 RUN free -h && df -h
