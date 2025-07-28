@@ -18,14 +18,11 @@ ENV CMAKE_BUILD_PARALLEL_LEVEL=1
 
 COPY ../ /opt/MFC
 
-ARG BASE_IMAGE
-RUN if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
-      export CC=nvc && \
-      export CXX=nvc++ && \
-      export FC=nvfortran && \
-      export PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin:$PATH" && \
-      export LD_LIBRARY_PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib:$LD_LIBRARY_PATH"; \
-    fi
+ENV CC=nvc
+ENV CXX=nvc++
+ENV FC=nvfortran
+ENV PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin:$PATH"
+ENV LD_LIBRARY_PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib:$LD_LIBRARY_PATH"
 
 # ARG BENCH
 # RUN if [ "$BENCH" = "true" ] && ! echo "$BASE_IMAGE" | grep -q "nvidia"; then \
