@@ -23,18 +23,13 @@ RUN curl https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA
     apt-get update -y && \
     apt-get install -y nvhpc-25-7-cuda-multi
 
-ARG CC_COMPILER=nvc
-ARG CXX_COMPILER=nvc++
-ARG FC_COMPILER=nvfortran
-ARG COMPILER_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin
-ARG COMPILER_LD_LIBRARY_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib
-
-ENV CC=${CC_COMPILER}
-ENV CXX=${CXX_COMPILER}
-ENV FC=${FC_COMPILER}
-ENV PATH="${COMPILER_PATH}:$PATH"
-ENV LD_LIBRARY_PATH="${COMPILER_LD_LIBRARY_PATH}:$LD_LIBRARY_PATH"
-
+ENV \
+  CC=nvc \
+  CXX=nvc++ \
+  FC=nvfortran \
+  PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin:$PATH" \
+  LD_LIBRARY_PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib:$LD_LIBRARY_PATH"
+  
 RUN free -h && df -h
 RUN cd /opt/MFC && rm -rf build
 RUN free -h && df -h

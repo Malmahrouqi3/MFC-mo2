@@ -70,11 +70,6 @@ jobs:
           file: /mnt/share/Dockerfile
           build-args: |
             BASE_IMAGE=${{ matrix.config.base_image }}
-            CC_COMPILER=nvc
-            CXX_COMPILER=nvc++
-            FC_COMPILER=nvfortran
-            COMPILER_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin
-            COMPILER_LD_LIBRARY_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib
           tags: mohdsaid497566/mfc:${{ matrix.config.name }}
           load: true
           push: true
