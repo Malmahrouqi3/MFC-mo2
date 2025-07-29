@@ -1,0 +1,40 @@
+name: Release Dispatcher
+
+on:
+  workflow_dispatch:
+    inputs:
+      from_tag:
+        description: 'Start tag (e.g. v4.0.0)'
+        required: true
+      to_tag:
+        description: 'End tag (e.g. v5.0.5)'
+        required: true
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get tags in range
+        id: tags
+        run: |
+          git clone --quiet https://github.com/MFlowCode/MFC.git mfc
+          cd mfc
+          git fetch --tags
+          TAGS=$(git tag --sort=creatordate)
+          TAGS_IN_RANGE=$(awk "/^${{ github.event.inputs.from_tag }}$/,/^${{ github.event.inputs.to_tag }}$/" <<< "$TAGS" | grep -v '^$')
+          echo "tags=$(echo $TAGS_IN_RANGE | tr '\n' ' ')" >> $GITHUB_OUTPUT
+
+      - name: Dispatch docker.yml for each tag
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tags = '${{ steps.tags.outputs.tags }}'.split(' ').filter(Boolean);
+            for (const tag of tags) {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'docker.yml',
+                ref: context.ref.replace('refs/heads/', ''),
+                inputs: { tag }
+              });
+            }

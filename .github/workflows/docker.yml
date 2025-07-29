@@ -1,24 +1,20 @@
-name: Containerization
+name: Build and Deploy Docker Images
 
 on:
   workflow_dispatch:
     inputs:
-      from_tag:
-        description: 'Start tag (e.g. v4.0.0)'
-        required: true
-      to_tag:
-        description: 'End tag (e.g. v5.0.5)'
+      tag:
+        description: 'Git tag to build'
         required: true
 
 jobs:
-  Container:
+  build-and-push:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         config:
-          - { name: 'cpu',         base_image: 'ubuntu:22.04'}
-          - { name: 'gpu',         base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04'}
-
+          - { name: 'cpu', base_image: 'ubuntu:22.04' }
+          - { name: 'gpu', base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04' }
     steps:
       - name: Login
         uses: docker/login-action@v3
@@ -30,80 +26,36 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        run: |
+          git clone --branch ${{ github.event.inputs.tag }} --depth 1 https://github.com/MFlowCode/MFC.git mfc
+
+      - name: Prepare Docker context
+        run: |
+          mkdir -p mfc/.github
+          cp .github/Dockerfile mfc/.github/Dockerfile
+          cp .github/.dockerignore mfc/.github/.dockerignore
+          sudo mkdir -p /mnt/share
+          sudo chmod 777 /mnt/share
+          rm -rf /mnt/share/*
+          cp -r mfc/* /mnt/share/
+          cp -r mfc/.git /mnt/share/.git
+          cp mfc/.github/Dockerfile /mnt/share/
+          cp mfc/.github/.dockerignore /mnt/share/
+
+      - name: Build and push image
+        uses: docker/build-push-action@v5
         with:
-          path: pr
-
-      - name: Clone base repo
-        run: |
-          set -e
-          git clone https://github.com/MFlowCode/MFC.git mfc
-          ls -l
-          cd mfc
-          git fetch --tags
-
-          TAGS=$(git tag --sort=creatordate)
-          TAGS_IN_RANGE=$(awk "/^${{ github.event.inputs.from_tag }}$/,/^${{ github.event.inputs.to_tag }}$/" <<< "$TAGS" | grep -v '^$')
-          echo "$TAGS_IN_RANGE"
-          echo "tags<<EOF" >> $GITHUB_OUTPUT
-          echo "$TAGS_IN_RANGE" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Build and push for each tag
-        env:
-          TAGS: ${{ steps.tags.outputs.tags }}
-        run: |
-          set -e
-          for TAG in $TAGS; do
-            rm -rf mfc
-            git clone --branch $TAG --depth 1 https://github.com/MFlowCode/MFC.git mfc
-            echo "Building for tag: $TAG"
-            cd mfc
-            git checkout $TAG
-            cd ..
-            # Ensure .github directory exists in the checked-out repo
-            mkdir -p mfc/.github
-            # Copy Dockerfile and .dockerignore from the workflow repo into the checked-out MFC code
-            cp pr/.github/Dockerfile mfc/.github/Dockerfile
-            cp pr/.github/.dockerignore mfc/.github/.dockerignore
-
-            sudo mkdir -p /mnt/share
-            sudo chmod 777 /mnt/share
-            rm -rf /mnt/share/*
-            cp -r mfc/* /mnt/share/
-            cp -r mfc/.git /mnt/share/.git
-            cp mfc/.github/Dockerfile /mnt/share/
-            cp mfc/.github/.dockerignore /mnt/share/
-
-            for TARGET in cpu gpu; do
-              if [ "$TARGET" = "cpu" ]; then
-                BASE_IMAGE="ubuntu:22.04"
-                CC_COMPILER="gcc"
-                CXX_COMPILER="g++"
-                FC_COMPILER="gfortran"
-                COMPILER_PATH="/usr/bin"
-                COMPILER_LD_LIBRARY_PATH="/usr/lib"
-              else
-                BASE_IMAGE="nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04"
-                CC_COMPILER="nvc"
-                CXX_COMPILER="nvc++"
-                FC_COMPILER="nvfortran"
-                COMPILER_PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin"
-                COMPILER_LD_LIBRARY_PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib"
-              fi
-              docker buildx build \
-                --builder default \
-                --push \
-                --no-cache \
-                --file /mnt/share/Dockerfile \
-                --build-arg BASE_IMAGE=$BASE_IMAGE \
-                --build-arg TARGET=$TARGET \
-                --build-arg CC_COMPILER=$CC_COMPILER \
-                --build-arg CXX_COMPILER=$CXX_COMPILER \
-                --build-arg FC_COMPILER=$FC_COMPILER \
-                --build-arg COMPILER_PATH=$COMPILER_PATH \
-                --build-arg COMPILER_LD_LIBRARY_PATH=$COMPILER_LD_LIBRARY_PATH \
-                --tag mohdsaid497566/mfc:${TAG}-${TARGET} \
-                /mnt/share
-            done
-          done
+          context: /mnt/share
+          file: /mnt/share/Dockerfile
+          build-args: |
+            BASE_IMAGE=${{ matrix.config.base_image }}
+            TARGET=${{ matrix.config.name }}
+            CC_COMPILER=${{ contains(matrix.config.name, 'gpu') && 'nvc' || 'gcc' }}
+            CXX_COMPILER=${{ contains(matrix.config.name, 'gpu') && 'nvc++' || 'g++' }}
+            FC_COMPILER=${{ contains(matrix.config.name, 'gpu') && 'nvfortran' || 'gfortran' }}
+            COMPILER_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin' || '/usr/bin' }}
+            COMPILER_LD_LIBRARY_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib' || '/usr/lib' }}
+          tags: mohdsaid497566/mfc:${{ github.event.inputs.tag }}-${{ matrix.config.name }}
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
