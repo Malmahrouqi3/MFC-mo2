@@ -1,6 +1,7 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
+ARG TARGET
 ARG CC_COMPILER
 ARG CXX_COMPILER
 ARG FC_COMPILER
@@ -8,7 +9,7 @@ ARG COMPILER_PATH
 ARG COMPILER_LD_LIBRARY_PATH
 
 RUN apt-get update -y && \
-    if ! echo "$BASE_IMAGE" | grep -q "nvidia"; then \
+    if [ "$TARGET" != "gpu" ]; then \
         apt-get install -y \
             build-essential git make cmake gcc g++ gfortran \
             python3 python3-venv python3-pip \
@@ -34,16 +35,16 @@ ENV FC=${FC_COMPILER}
 ENV PATH="${COMPILER_PATH}:$PATH"
 ENV LD_LIBRARY_PATH="${COMPILER_LD_LIBRARY_PATH}:${LD_LIBRARY_PATH:-}"
 
-RUN echo "BASE_IMAGE=$BASE_IMAGE CC=$CC_COMPILER FC=$FC_COMPILER" && \
+RUN echo "TARGET=$TARGET CC=$CC_COMPILER FC=$FC_COMPILER" && \
     cd /opt/MFC && \
-    if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
+    if [ "$TARGET" = "gpu" ]; then \
       ./mfc.sh build --gpu -j $(nproc); \
     else \
       ./mfc.sh build -j $(nproc); \
     fi
 
 RUN cd /opt/MFC && \
-    if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
+    if [ "$TARGET" = "gpu" ]; then \
       ./mfc.sh test --dry-run --gpu -j $(nproc); \
     else \
       ./mfc.sh test --dry-run -j $(nproc); \
