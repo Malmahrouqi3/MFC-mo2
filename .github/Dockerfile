@@ -19,7 +19,8 @@ RUN apt-get update -y && \
         apt-get install -y \
             build-essential git make cmake \
             python3 python3-venv python3-pip \
-            libfftw3-dev libatlas-base-dev; \
+            libfftw3-dev libatlas-base-dev \
+            openmpi-bin libopenmpi-dev; \
     fi && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
