@@ -8,11 +8,9 @@ jobs:
     strategy:
       matrix:
         config:
-          - { name: 'cpu',         base_image: 'ubuntu:22.04',      bench: false }
-          - { name: 'gpu',         base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04', bench: false }
-          # - { name: 'cpu_bench',   base_image: 'ubuntu:22.04',      bench: true }
-          # - { name: 'gpu_bench',   base_image: 'nvcr.io/nvidia/nvhpc:25.5-devel-cuda12.9-ubuntu24.04', bench: true }
-      
+          - { name: 'cpu',         base_image: 'ubuntu:22.04'}
+          - { name: 'gpu',         base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04'}
+
     steps:
       - name: Clone
         uses: actions/checkout@v4
@@ -27,27 +25,9 @@ jobs:
 
       - name: Setup
         uses: docker/setup-buildx-action@v3
-        
+
       - name: Stage
         run: |
-          sudo docker system prune -af || true
-          sudo docker image prune -af || true
-          sudo docker builder prune -af || true
-          sudo rm -rf /var/lib/docker/*
-          sudo rm -rf /var/lib/containerd/*
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
-          sudo rm -rf /usr/local/share/boost /usr/lib/jvm
-          sudo rm -rf /opt/hostedtoolcache /home/runner/.cache
-          sudo rm -rf /var/lib/apt/lists/*
-          sudo apt-get clean
-          sudo rm -rf /tmp/*
-          sudo rm -rf /home/runner/work/_temp
-          sudo rm -rf /home/runner/.npm /home/runner/.cargo /home/runner/.rustup
-          sudo rm -rf /usr/local/share/edge_driver /usr/local/share/chromium
-          sudo rm -rf /usr/local/share/powershell /usr/local/share/swift
-          sudo rm -rf /usr/local/share/vcpkg
-          sudo rm -rf /usr/share/swift
-          df -h
           sudo mkdir -p /mnt/share
           sudo chmod 777 /mnt/share
           cp -r mfc/* /mnt/share/

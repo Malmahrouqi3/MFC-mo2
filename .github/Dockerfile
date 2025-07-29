@@ -30,19 +30,6 @@ ENV FC=${FC_COMPILER}
 ENV PATH="${COMPILER_PATH}:$PATH"
 ENV LD_LIBRARY_PATH="${COMPILER_LD_LIBRARY_PATH}:$LD_LIBRARY_PATH"
 
-# ARG BENCH
-# RUN if [ "$BENCH" = "true" ] && ! echo "$BASE_IMAGE" | grep -q "nvidia"; then \
-#       apt-get install -y --no-install-recommends libatlas-base-dev mpich libmpich-dev gfortran && \
-#       wget https://www.netlib.org/benchmark/hpl/hpl-2.3.tar.gz && \
-#       tar -xzvf hpl-2.3.tar.gz && \
-#       mv hpl-2.3 hpl; \
-#     fi
-
-# RUN if [ "$BENCH" = "true" ] && echo "$BASE_IMAGE" | grep -q "nvidia"; then \
-#       wget https://developer.download.nvidia.com/compute/nvidia-hpc-benchmarks/25.04/local_installers/nvidia-hpc-benchmarks-local-repo-ubuntu2404-25.04_1.0-1_amd64.deb -O /tmp/nvidia-hpc-benchmarks.deb && \
-#       dpkg -i /tmp/nvidia-hpc-benchmarks.deb && \
-#       cp /var/nvidia-hpc-benchmarks-local-repo-ubuntu2404-25.04/nvidia-hpc-benchmarks-*-keyring.gpg /usr/share/keyrings/; \
-#     fi
 RUN free -h && df -h
 RUN cd /opt/MFC && rm -rf build
 RUN free -h && df -h
