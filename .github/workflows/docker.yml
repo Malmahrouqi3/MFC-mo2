@@ -1,4 +1,4 @@
-name: Build MFC Containers
+name: Containers
 
 on: [push, pull_request]
 
@@ -54,14 +54,6 @@ jobs:
           cp -r mfc/* /mnt/share/
           cp -r mfc/.git /mnt/share/.git
           cp mfc/.github/Dockerfile /mnt/share/
-
-      - name: Add Swap
-        run: |
-          sudo fallocate -l 8G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
-          free -h
 
       - name: Build and Deploy
         uses: docker/build-push-action@v5
