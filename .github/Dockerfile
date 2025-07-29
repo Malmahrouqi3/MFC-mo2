@@ -50,4 +50,5 @@ RUN cd /opt/MFC && \
       ./mfc.sh test --dry-run -j $(nproc); \
     fi
 
-ENTRYPOINT ["bash", "-c", "cd /opt/MFC && exec bash"]
+WORKDIR /opt/MFC
+ENTRYPOINT ["bash"]
