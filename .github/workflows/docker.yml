@@ -20,6 +20,11 @@ jobs:
           - { name: 'gpu',         base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04'}
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          path: pr
+
       - name: Clone base repo
         run: |
           git clone https://github.com/MFlowCode/MFC.git mfc
@@ -74,8 +79,8 @@ jobs:
             # Ensure .github directory exists in the checked-out repo
             mkdir -p mfc/.github
             # Copy Dockerfile and .dockerignore from the workflow repo into the checked-out MFC code
-            cp .github/Dockerfile mfc/.github/Dockerfile
-            cp .github/.dockerignore mfc/.github/.dockerignore
+            cp pr/.github/Dockerfile mfc/.github/Dockerfile
+            cp pr/.github/.dockerignore mfc/.github/.dockerignore
 
             sudo mkdir -p /mnt/share
             sudo chmod 777 /mnt/share
