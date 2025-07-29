@@ -13,8 +13,6 @@ RUN apt-get update -y && \
 ENV OMPI_ALLOW_RUN_AS_ROOT=1
 ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 ENV PATH="/opt/MFC:$PATH"
-ENV MAKEFLAGS="-j1"
-ENV CMAKE_BUILD_PARALLEL_LEVEL=1
 
 COPY ../ /opt/MFC
 
@@ -30,25 +28,18 @@ ENV FC=${FC_COMPILER}
 ENV PATH="${COMPILER_PATH}:$PATH"
 ENV LD_LIBRARY_PATH="${COMPILER_LD_LIBRARY_PATH}:$LD_LIBRARY_PATH"
 
-RUN free -h && df -h
-RUN cd /opt/MFC && rm -rf build
-RUN free -h && df -h
 RUN cd /opt/MFC && \
     if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
-      ./mfc.sh build --mpi --gpu -j 1; \
+      ./mfc.sh build --gpu -j $(nproc); \
     else \
-      ./mfc.sh build -j 1; \
+      ./mfc.sh build -j $(nproc); \
     fi
-RUN free -h && df -h
+
 RUN cd /opt/MFC && \
     if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
-      ./mfc.sh test --dry-run --gpu; \
+      ./mfc.sh test --dry-run --gpu -j $(nproc); \
     else \
-      ./mfc.sh test --dry-run; \
+      ./mfc.sh test --dry-run -j $(nproc); \
     fi
 
-RUN rm -rf /var/lib/apt/lists/*
-RUN free -h && df -h
-
-WORKDIR /opt/MFC
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["bash", "-c", "cd /opt/MFC && exec bash"]

@@ -1,9 +1,9 @@
 name: Containers
 
-on: [push, pull_request]
+on: [push, pull_request, release]
 
 jobs:
-  container:
+  Container:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -49,7 +49,6 @@ jobs:
             COMPILER_PATH=${{ contains(matrix.config.base_image, 'nvidia') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin' || '/usr/bin' }}
             COMPILER_LD_LIBRARY_PATH=${{ contains(matrix.config.base_image, 'nvidia') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib' || '/usr/lib' }}
           tags: mohdsaid497566/mfc:${{ matrix.config.name }}
-          load: true
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
