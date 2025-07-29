@@ -71,6 +71,8 @@ jobs:
             cd mfc
             git checkout $TAG
             cd ..
+            # Ensure .github directory exists in the checked-out repo
+            mkdir -p mfc/.github
             # Copy Dockerfile and .dockerignore from the workflow repo into the checked-out MFC code
             cp .github/Dockerfile mfc/.github/Dockerfile
             cp .github/.dockerignore mfc/.github/.dockerignore
