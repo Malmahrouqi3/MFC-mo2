@@ -12,7 +12,6 @@ jobs:
           - { name: 'gpu',         base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04', bench: false }
           # - { name: 'cpu_bench',   base_image: 'ubuntu:22.04',      bench: true }
           # - { name: 'gpu_bench',   base_image: 'nvcr.io/nvidia/nvhpc:25.5-devel-cuda12.9-ubuntu24.04', bench: true }
-      max-parallel: 1
       
     steps:
       - name: Clone
@@ -55,7 +54,6 @@ jobs:
           cp -r mfc/.git /mnt/share/.git
           cp mfc/.github/Dockerfile /mnt/share/
           docker buildx create --name mfcbuilder --driver docker-container --use --driver-opt root=/mnt/share/buildkit
-
 
       - name: Build and Deploy
         uses: docker/build-push-action@v5
