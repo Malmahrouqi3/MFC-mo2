@@ -33,6 +33,7 @@ jobs:
           cp -r mfc/* /mnt/share/
           cp -r mfc/.git /mnt/share/.git
           cp mfc/.github/Dockerfile /mnt/share/
+          cp mfc/.github/.dockerignore /mnt/share/
           docker buildx create --name mfcbuilder --driver docker-container --use
 
       - name: Build and Deploy
