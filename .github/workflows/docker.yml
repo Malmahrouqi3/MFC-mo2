@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       from_tag:
-        description: 'v4.0.0'
+        description: 'Start tag (e.g. v4.0.0)'
         required: true
       to_tag:
-        description: 'v5.0.5'
+        description: 'End tag (e.g. v5.0.5)'
         required: true
 
 jobs:
@@ -20,16 +20,18 @@ jobs:
           - { name: 'gpu',         base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04'}
 
     steps:
-      - name: Clone
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - name: Clone base repo
+        run: |
+          git clone https://github.com/MFlowCode/MFC.git mfc
+          cd mfc
+          git fetch --tags
 
       - name: Get tags in range
         id: tags
         run: |
-          TAGS=$(git tag --sort=creatordate)
-          TAGS_IN_RANGE=$(awk "/^${{ github.event.inputs.from_tag }}$/,/^${{ github.event.inputs.to_tag }}$/" <<< "$TAGS")
+          TAGS=$(cd mfc && git tag --sort=creatordate)
+          TAGS_IN_RANGE=$(awk "/^${{ github.event.inputs.from_tag }}$/,/^${{ github.event.inputs.to_tag }}$/" <<< "$TAGS" | grep -v '^$')
+          echo "$TAGS_IN_RANGE"
           echo "tags<<EOF" >> $GITHUB_OUTPUT
           echo "$TAGS_IN_RANGE" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
