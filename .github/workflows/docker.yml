@@ -25,10 +25,15 @@ jobs:
       - name: Setup
         uses: docker/setup-buildx-action@v3
 
-      - name: Checkout code
+      - name: Checkout base repo
         run: |
           git clone --branch ${{ github.event.inputs.tag }} --depth 1 https://github.com/MFlowCode/MFC.git mfc
-
+    
+      - name: Checkout PR repo
+        uses: actions/checkout@v3
+        with:
+          path: pr
+          
       - name: Prepare Docker context
         run: |
           mkdir -p mfc/.github
@@ -39,8 +44,8 @@ jobs:
           rm -rf /mnt/share/*
           cp -r mfc/* /mnt/share/
           cp -r mfc/.git /mnt/share/.git
-          cp mfc/.github/Dockerfile /mnt/share/
-          cp mfc/.github/.dockerignore /mnt/share/
+          cp pr/.github/Dockerfile /mnt/share/
+          cp pr/.github/.dockerignore /mnt/share/
 
       - name: Build and push image
         uses: docker/build-push-action@v5
