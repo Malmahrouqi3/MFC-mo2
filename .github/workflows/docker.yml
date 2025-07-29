@@ -42,7 +42,7 @@ jobs:
           cd mfc
           git fetch --tags
 
-          TAGS=$(cd mfc && git tag --sort=creatordate)
+          TAGS=$(git tag --sort=creatordate)
           TAGS_IN_RANGE=$(awk "/^${{ github.event.inputs.from_tag }}$/,/^${{ github.event.inputs.to_tag }}$/" <<< "$TAGS" | grep -v '^$')
           echo "$TAGS_IN_RANGE"
           echo "tags<<EOF" >> $GITHUB_OUTPUT
