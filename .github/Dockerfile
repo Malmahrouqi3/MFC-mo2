@@ -2,11 +2,18 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
 RUN apt-get update -y && \
-    apt-get install -y \
-        build-essential git make cmake gcc g++ gfortran \
-        python3 python3-venv python3-pip \
-        openmpi-bin libopenmpi-dev libfftw3-dev \
-        libatlas-base-dev mpich libmpich-dev && \
+    if ! echo "$BASE_IMAGE" | grep -q "nvidia"; then \
+        apt-get install -y \
+            build-essential git make cmake gcc g++ gfortran \
+            python3 python3-venv python3-pip \
+            openmpi-bin libopenmpi-dev libfftw3-dev \
+            libatlas-base-dev mpich libmpich-dev; \
+    else \
+        apt-get install -y \
+            build-essential git make cmake \
+            python3 python3-venv python3-pip \
+            libfftw3-dev libatlas-base-dev; \
+    fi && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV OMPI_ALLOW_RUN_AS_ROOT=1
