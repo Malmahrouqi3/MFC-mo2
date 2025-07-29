@@ -61,21 +61,57 @@ jobs:
           cp mfc/.github/.dockerignore /mnt/share/
           docker buildx create --name mfcbuilder --driver docker-container --use
 
-      - name: Build and Deploy
-        uses: docker/build-push-action@v5
-        with:
-          builder: mfcbuilder
-          context: /mnt/share
-          file: /mnt/share/Dockerfile
-          build-args: |
-            BASE_IMAGE=${{ matrix.config.base_image }}
-            TARGET=${{ matrix.config.name }}
-            CC_COMPILER=${{ contains(matrix.config.name, 'gpu') && 'nvc' || 'gcc' }}
-            CXX_COMPILER=${{ contains(matrix.config.name, 'gpu') && 'nvc++' || 'g++' }}
-            FC_COMPILER=${{ contains(matrix.config.name, 'gpu') && 'nvfortran' || 'gfortran' }}
-            COMPILER_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin' || '/usr/bin' }}
-            COMPILER_LD_LIBRARY_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib' || '/usr/lib' }}
-          tags: mohdsaid497566/mfc:${{ env.TAG }}-${{ matrix.config.name }}
-          push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      - name: Build and push for each tag
+        env:
+          TAGS: ${{ steps.tags.outputs.tags }}
+        run: |
+          set -e
+          for TAG in $TAGS; do
+            echo "Building for tag: $TAG"
+            cd mfc
+            git checkout $TAG
+            cd ..
+            # Copy Dockerfile and .dockerignore from the workflow repo into the checked-out MFC code
+            cp .github/Dockerfile mfc/.github/Dockerfile
+            cp .github/.dockerignore mfc/.github/.dockerignore
+
+            sudo mkdir -p /mnt/share
+            sudo chmod 777 /mnt/share
+            rm -rf /mnt/share/*
+            cp -r mfc/* /mnt/share/
+            cp -r mfc/.git /mnt/share/.git
+            cp mfc/.github/Dockerfile /mnt/share/
+            cp mfc/.github/.dockerignore /mnt/share/
+
+            for TARGET in cpu gpu; do
+              if [ "$TARGET" = "cpu" ]; then
+                BASE_IMAGE="ubuntu:22.04"
+                CC_COMPILER="gcc"
+                CXX_COMPILER="g++"
+                FC_COMPILER="gfortran"
+                COMPILER_PATH="/usr/bin"
+                COMPILER_LD_LIBRARY_PATH="/usr/lib"
+              else
+                BASE_IMAGE="nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04"
+                CC_COMPILER="nvc"
+                CXX_COMPILER="nvc++"
+                FC_COMPILER="nvfortran"
+                COMPILER_PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin"
+                COMPILER_LD_LIBRARY_PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib"
+              fi
+              docker buildx build \
+                --builder default \
+                --push \
+                --no-cache \
+                --file /mnt/share/Dockerfile \
+                --build-arg BASE_IMAGE=$BASE_IMAGE \
+                --build-arg TARGET=$TARGET \
+                --build-arg CC_COMPILER=$CC_COMPILER \
+                --build-arg CXX_COMPILER=$CXX_COMPILER \
+                --build-arg FC_COMPILER=$FC_COMPILER \
+                --build-arg COMPILER_PATH=$COMPILER_PATH \
+                --build-arg COMPILER_LD_LIBRARY_PATH=$COMPILER_LD_LIBRARY_PATH \
+                --tag mohdsaid497566/mfc:${TAG}-${TARGET} \
+                /mnt/share
+            done
+          done
