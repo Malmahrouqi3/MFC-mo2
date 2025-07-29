@@ -1,6 +1,12 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
+ARG CC_COMPILER
+ARG CXX_COMPILER
+ARG FC_COMPILER
+ARG COMPILER_PATH
+ARG COMPILER_LD_LIBRARY_PATH
+
 RUN apt-get update -y && \
     if ! echo "$BASE_IMAGE" | grep -q "nvidia"; then \
         apt-get install -y \
@@ -22,19 +28,14 @@ ENV PATH="/opt/MFC:$PATH"
 
 COPY ../ /opt/MFC
 
-ARG CC_COMPILER
-ARG CXX_COMPILER
-ARG FC_COMPILER
-ARG COMPILER_PATH
-ARG COMPILER_LD_LIBRARY_PATH
-
 ENV CC=${CC_COMPILER}
 ENV CXX=${CXX_COMPILER}
 ENV FC=${FC_COMPILER}
 ENV PATH="${COMPILER_PATH}:$PATH"
 ENV LD_LIBRARY_PATH="${COMPILER_LD_LIBRARY_PATH}:${LD_LIBRARY_PATH:-}"
 
-RUN cd /opt/MFC && \
+RUN echo "BASE_IMAGE=$BASE_IMAGE CC=$CC_COMPILER FC=$FC_COMPILER" && \
+    cd /opt/MFC && \
     if echo "$BASE_IMAGE" | grep -q "nvidia"; then \
       ./mfc.sh build --gpu -j $(nproc); \
     else \
