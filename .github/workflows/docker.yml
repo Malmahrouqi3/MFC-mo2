@@ -20,7 +20,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: Setup
         uses: docker/setup-buildx-action@v3
@@ -43,7 +43,7 @@ jobs:
           cp -r mfc/.git /mnt/share/.git
           cp pr/.github/Dockerfile /mnt/share/
           cp pr/.github/.dockerignore /mnt/share/
-          
+
       - name: Build and push image
         uses: docker/build-push-action@v5
         with:
