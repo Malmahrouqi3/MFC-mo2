@@ -33,12 +33,9 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: pr
-          
+
       - name: Prepare Docker context
         run: |
-          mkdir -p mfc/.github
-          cp .github/Dockerfile mfc/.github/Dockerfile
-          cp .github/.dockerignore mfc/.github/.dockerignore
           sudo mkdir -p /mnt/share
           sudo chmod 777 /mnt/share
           rm -rf /mnt/share/*
@@ -46,7 +43,7 @@ jobs:
           cp -r mfc/.git /mnt/share/.git
           cp pr/.github/Dockerfile /mnt/share/
           cp pr/.github/.dockerignore /mnt/share/
-
+          
       - name: Build and push image
         uses: docker/build-push-action@v5
         with:
