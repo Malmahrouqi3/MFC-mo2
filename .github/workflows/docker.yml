@@ -36,7 +36,9 @@ jobs:
 
       - name: Clone base repo
         run: |
+          set -e
           git clone https://github.com/MFlowCode/MFC.git mfc
+          ls -l
           cd mfc
           git fetch --tags
 
