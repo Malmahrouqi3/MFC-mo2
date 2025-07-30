@@ -43,31 +43,42 @@ jobs:
           cp -r mfc/.git /mnt/share/.git
           cp pr/.github/Dockerfile /mnt/share/
           cp pr/.github/.dockerignore /mnt/share/
-          cp pr/toolchain/dependencies/Silo.patch /mnt/share/
-          grep -rl 'https://github.com/henryleberre/Silo' . | xargs sed -i 's|https://github.com/henryleberre/Silo|https://github.com/LLNL/Silo|g'
+          cp pr/toolchain/dependencies/Silo.patch /mnt/share/toolchain/dependencies/Silo.patch
 
       - name: Replace old SILO block in CMakeLists.txt
         run: |
-          sed -i '/# SILO/,/^endif()/c\
-          # SILO\n\
-          if (MFC_SILO)\n\
-              ExternalProject_Add(silo\n\
-                  GIT_REPOSITORY "https://github.com/henryleberre/Silo"\n\
-                  GIT_TAG        964d993039b467e3d472d3a70afd03380fe2c320\n\
-                  GIT_SHALLOW    ON\n\
-                  GIT_PROGRESS   ON\n\
-                  CMAKE_ARGS     -DSILO_ENABLE_SHARED=OFF\n\
-                                -DSILO_ENABLE_SILOCK=OFF\n\
-                                -DSILO_ENABLE_BROWSER=OFF\n\
-                                -DHDF5_USE_STATIC_LIBRARIES=ON\n\
-                                "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"\n\
-                                $<$<BOOL:${MFC_BUILD_HDF5}>:"-DSILO_HDF5_DIR=\\"${CMAKE_INSTALL_PREFIX}\\"">\n\
-              )\n\
-          \n\
-              if (MFC_HDF5 AND NOT CMAKE_Fortran_COMPILER_ID STREQUAL "Cray")\n\
-                  add_dependencies(silo hdf5)\n\
-              endif()\n\
-          endif()' /mnt/share/toolchain/dependencies/CMakeLists.txt
+          sed -i '/# SILO/,/^endif()/{
+              r /dev/stdin
+              d
+          }' /mnt/share/toolchain/dependencies/CMakeLists.txt <<'EOF'
+          # SILO
+          if (MFC_SILO)
+              find_package(SILO)
+              if (SILO_FOUND)
+                  message(STATUS "SILO found.")
+                  add_custom_target(silo)
+              else()
+                  find_package(Git REQUIRED)
+
+                  ExternalProject_Add(silo
+                      GIT_REPOSITORY "https://github.com/LLNL/Silo"
+                      GIT_TAG        9af504ef4fb79153e1fbf3bdb75421b6b65f6dc4
+                      GIT_PROGRESS   ON
+                      PATCH_COMMAND  "${GIT_EXECUTABLE}" stash
+                                  && "${GIT_EXECUTABLE}" apply "${CMAKE_SOURCE_DIR}/Silo.patch"
+                      CMAKE_ARGS     -DSILO_ENABLE_SHARED=OFF
+                                    -DSILO_ENABLE_SILOCK=OFF
+                                    -DSILO_ENABLE_BROWSER=OFF
+                                    -DFIND_LIBRARY_USE_LIB64_PATHS=ON
+                                    "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
+                                    "-DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}"
+                                    "-DCMAKE_FIND_PACKAGE_REDIRECTS_DIR=${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}"
+                                    "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+                                    "$<$<STREQUAL:${CMAKE_Fortran_COMPILER_ID},Cray>:-DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/../cmake/cce>"
+                  )
+                endif()
+          endif()
+          EOF
 
       - name: Build and push image
         uses: docker/build-push-action@v5
