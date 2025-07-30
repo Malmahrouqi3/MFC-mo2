@@ -43,6 +43,7 @@ jobs:
           cp -r mfc/.git /mnt/share/.git
           cp pr/.github/Dockerfile /mnt/share/
           cp pr/.github/.dockerignore /mnt/share/
+          grep -rl 'https://github.com/henryleberre/Silo' . | xargs sed -i 's|https://github.com/henryleberre/Silo|https://github.com/LLNL/Silo|g'
 
       - name: Build and push image
         uses: docker/build-push-action@v5
