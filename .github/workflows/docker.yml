@@ -43,7 +43,31 @@ jobs:
           cp -r mfc/.git /mnt/share/.git
           cp pr/.github/Dockerfile /mnt/share/
           cp pr/.github/.dockerignore /mnt/share/
+          cp pr/toolchain/dependencies/Silo.patch /mnt/share/
           grep -rl 'https://github.com/henryleberre/Silo' . | xargs sed -i 's|https://github.com/henryleberre/Silo|https://github.com/LLNL/Silo|g'
+
+      - name: Replace old SILO block in CMakeLists.txt
+        run: |
+          sed -i '/# SILO/,/^endif()/c\
+          # SILO\n\
+          if (MFC_SILO)\n\
+              ExternalProject_Add(silo\n\
+                  GIT_REPOSITORY "https://github.com/henryleberre/Silo"\n\
+                  GIT_TAG        964d993039b467e3d472d3a70afd03380fe2c320\n\
+                  GIT_SHALLOW    ON\n\
+                  GIT_PROGRESS   ON\n\
+                  CMAKE_ARGS     -DSILO_ENABLE_SHARED=OFF\n\
+                                -DSILO_ENABLE_SILOCK=OFF\n\
+                                -DSILO_ENABLE_BROWSER=OFF\n\
+                                -DHDF5_USE_STATIC_LIBRARIES=ON\n\
+                                "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"\n\
+                                $<$<BOOL:${MFC_BUILD_HDF5}>:"-DSILO_HDF5_DIR=\\"${CMAKE_INSTALL_PREFIX}\\"">\n\
+              )\n\
+          \n\
+              if (MFC_HDF5 AND NOT CMAKE_Fortran_COMPILER_ID STREQUAL "Cray")\n\
+                  add_dependencies(silo hdf5)\n\
+              endif()\n\
+          endif()' /mnt/share/toolchain/dependencies/CMakeLists.txt
 
       - name: Build and push image
         uses: docker/build-push-action@v5
