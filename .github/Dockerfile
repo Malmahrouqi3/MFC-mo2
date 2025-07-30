@@ -30,6 +30,8 @@ ENV PATH="/opt/MFC:$PATH"
 
 COPY ../ /opt/MFC
 
+RUN find /opt/MFC -type f -exec sed -i 's|https://github.com/henryleberre/Silo|https://github.com/LLNL/Silo|g' {} +
+
 ENV CC=${CC_COMPILER}
 ENV CXX=${CXX_COMPILER}
 ENV FC=${FC_COMPILER}
