@@ -7,5 +7,5 @@
     "editor.formatOnSave": true
   },
   "postCreateCommand": "apt-get update && apt-get install -y curl && echo 'MFC Dev Container ready!'",
-  "postStartCommand": "echo 'Welcome to the MFC Dev Container!'"
+  "postStartCommand": "cd /opt/MFC && echo 'Welcome to the MFC Dev Container!'"
 }
