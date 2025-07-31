@@ -1,9 +1,6 @@
 {
   "name": "MFC Dev Container",
   "image": "mohdsaid497566/mfc:cpu-v1.0.0",
-  "features": {
-    "ghcr.io/devcontainers/features/docker-cli:1": {}
-  },
   "workspaceFolder": "/workspaces/${{repo}}",
   "settings": {
     "terminal.integrated.shell.linux": "/bin/bash",
