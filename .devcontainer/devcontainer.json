@@ -6,6 +6,5 @@
     "terminal.integrated.shell.linux": "/bin/bash",
     "editor.formatOnSave": true
   },
-  "postCreateCommand": "apt-get update && apt-get install -y curl",
-  "postStartCommand": "cd /opt/MFC"
+  "postCreateCommand": "apt-get update && apt-get install -y curl && cd /opt/MFC"
 }
