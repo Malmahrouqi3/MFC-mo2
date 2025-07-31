@@ -1,6 +1,6 @@
 {
   "name": "MFC Dev Container",
-  "image": "mohdsaid497566/mfc:cpu-v1.0.0",
+  "image": "mohdsaid497566/mfc:v4.4.1-cpu",
   "workspaceFolder": "/workspaces/${{repo}}",
   "settings": {
     "terminal.integrated.shell.linux": "/bin/bash",
