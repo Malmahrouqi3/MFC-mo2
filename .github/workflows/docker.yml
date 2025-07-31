@@ -13,10 +13,10 @@ jobs:
     strategy:
       matrix:
         config:
-          - { name: 'cpu', platform: 'linux/amd64', base_image: 'ubuntu:22.04'}
-          - { name: 'cpu', platform: 'linux/arm64', base_image: 'ubuntu:22.04'}
-          # - { name: 'gpu', platform: 'linux/amd64', base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04'}
-          # - { name: 'gpu', platform: 'linux/arm64', base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04'}
+          - { name: 'cpu', platform: 'amd64', base_image: 'ubuntu:22.04'}
+          - { name: 'cpu', platform: 'arm64', base_image: 'ubuntu:22.04'}
+          - { name: 'gpu', platform: 'amd64', base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04'}
+          - { name: 'gpu', platform: 'arm64', base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04'}
 
     steps:
       - name: Login
@@ -89,7 +89,7 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v5
         with:
-          platforms: ${{ matrix.config.platform }}
+          platforms: linux/${{ matrix.config.platform }}
           context: /mnt/share
           file: /mnt/share/Dockerfile
           build-args: |
@@ -100,7 +100,7 @@ jobs:
             FC_COMPILER=${{ contains(matrix.config.name, 'gpu') && 'nvfortran' || 'gfortran' }}
             COMPILER_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin' || '/usr/bin' }}
             COMPILER_LD_LIBRARY_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib' || '/usr/lib' }}
-          tags: mohdsaid497566/mfc:${{ github.event.inputs.tag }}-${{ matrix.config.name }}
+          tags: mohdsaid497566/mfc:${{ github.event.inputs.tag }}-${{ matrix.config.name }}-${{ matrix.config.platform }}
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
