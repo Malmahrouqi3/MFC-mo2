@@ -1,6 +1,6 @@
 {
   "name": "MFC Dev Container",
-  "image": "mohdsaid497566/mfc:mohdsaid497566/mfc:cpu-v1.0.0",
+  "image": "mohdsaid497566/mfc:cpu-v1.0.0",
   "features": {
     "ghcr.io/devcontainers/features/docker-cli:1": {}
   },
