@@ -1,0 +1,14 @@
+{
+  "name": "MFC Dev Container",
+  "image": "mohdsaid497566/mfc:mohdsaid497566/mfc:cpu-v1.0.0",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-cli:1": {}
+  },
+  "workspaceFolder": "/workspaces/${{repo}}",
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash",
+    "editor.formatOnSave": true
+  },
+  "postCreateCommand": "apt-get update && apt-get install -y curl && echo 'MFC Dev Container ready!'",
+  "postStartCommand": "echo 'Welcome to the MFC Dev Container!'"
+}
