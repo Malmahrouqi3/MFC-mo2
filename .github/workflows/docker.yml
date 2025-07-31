@@ -13,8 +13,10 @@ jobs:
     strategy:
       matrix:
         config:
-          # - { name: 'cpu', base_image: 'ubuntu:22.04' }
-          - { name: 'gpu', base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04' }
+          - { name: 'cpu', base_image: 'ubuntu:22.04', platform: 'linux/amd64'  }
+          - { name: 'cpu', base_image: 'ubuntu:22.04', platform: 'linux/arm64'  }
+          - { name: 'gpu', base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04', platform: 'linux/amd64' }
+          - { name: 'gpu', base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04', platform: 'linux/arm64' }
     steps:
       - name: Login
         uses: docker/login-action@v3
@@ -83,7 +85,7 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v5
         with:
-          platforms: linux/arm64,linux/amd64
+          platforms: ${{ matrix.config.platform }}
           context: /mnt/share
           file: /mnt/share/Dockerfile
           build-args: |
