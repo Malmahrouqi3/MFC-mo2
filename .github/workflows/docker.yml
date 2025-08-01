@@ -100,7 +100,7 @@ jobs:
             FC_COMPILER=${{ contains(matrix.config.name, 'gpu') && 'nvfortran' || 'gfortran' }}
             COMPILER_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin' || '/usr/bin' }}
             COMPILER_LD_LIBRARY_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib' || '/usr/lib' }}
-          tags: mohdsaid497566/mfc:${{ github.event.inputs.tag }}-${{ matrix.config.name }}-${{ matrix.config.platform }}
+          tags: malmahrouqi/mfc:${{ github.event.inputs.tag }}-${{ matrix.config.name }}-${{ matrix.config.platform }}
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -117,12 +117,12 @@ jobs:
 
       - name: Create and push multi-arch manifests
         run: |
-          docker manifest create mohdsaid497566/mfc:${{ github.event.inputs.tag }}-cpu \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-cpu-amd64 \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-cpu-arm64
-          docker manifest push mohdsaid497566/mfc:${{ github.event.inputs.tag }}-cpu
+          docker manifest create malmahrouqi/mfc:${{ github.event.inputs.tag }}-cpu \
+            malmahrouqi/mfc:${{ github.event.inputs.tag }}-cpu-amd64 \
+            malmahrouqi/mfc:${{ github.event.inputs.tag }}-cpu-arm64
+          docker manifest push malmahrouqi/mfc:${{ github.event.inputs.tag }}-cpu
 
-          docker manifest create mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-amd64 \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-arm64
-          docker manifest push mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu
+          docker manifest create malmahrouqi/mfc:${{ github.event.inputs.tag }}-gpu \
+            malmahrouqi/mfc:${{ github.event.inputs.tag }}-gpu-amd64 \
+            malmahrouqi/mfc:${{ github.event.inputs.tag }}-gpu-arm64
+          docker manifest push malmahrouqi/mfc:${{ github.event.inputs.tag }}-gpu
