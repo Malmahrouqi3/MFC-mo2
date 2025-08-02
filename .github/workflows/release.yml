@@ -45,11 +45,11 @@ jobs:
                   repo: context.repo.repo,
                   workflow_id: 'docker.yml',
                   event: 'workflow_dispatch',
-                  status: 'in_progress'
+                  per_page: 5
                 });
+                // Find the most recent queued or in_progress run
                 const found = runs.data.workflow_runs.find(run =>
-                  run.head_branch === context.ref.replace('refs/heads/', '') &&
-                  run.display_title.includes(tag)
+                  ['queued', 'in_progress'].includes(run.status)
                 );
                 if (found) {
                   runId = found.id;
