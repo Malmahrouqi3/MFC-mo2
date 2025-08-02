@@ -7,6 +7,10 @@ on:
         description: 'tag to containerize'
         required: true
 
+concurrency:
+  group: Containerization
+  cancel-in-progress: false
+
 jobs:
   Container:
     strategy:
