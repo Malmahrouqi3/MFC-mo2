@@ -89,6 +89,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           # platforms: linux/${{ matrix.config.platform }}
+          builder: default
           context: /mnt/share
           file: /mnt/share/Dockerfile
           build-args: |
