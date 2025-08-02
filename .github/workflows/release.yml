@@ -30,7 +30,6 @@ jobs:
           script: |
             const tags = '${{ steps.tags.outputs.tags }}'.split(' ').filter(Boolean);
             for (const tag of tags) {
-              // Dispatch the workflow
               await github.rest.actions.createWorkflowDispatch({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -39,7 +38,6 @@ jobs:
                 inputs: { tag }
               });
 
-              // Wait for the workflow run to start
               let runId = null;
               for (let i = 0; i < 20; i++) { // Try for up to 100 seconds
                 const runs = await github.rest.actions.listWorkflowRuns({
@@ -64,7 +62,6 @@ jobs:
                 return;
               }
 
-              // Wait for the workflow run to complete
               let completed = false;
               while (!completed) {
                 const run = await github.rest.actions.getWorkflowRun({
