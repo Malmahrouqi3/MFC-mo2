@@ -8,9 +8,9 @@ on:
         required: true
 
 concurrency:
-  group: Containerization
+  group: Containerization-${{ github.event.inputs.tag }}
   cancel-in-progress: false
-
+  
 jobs:
   Container:
     strategy:

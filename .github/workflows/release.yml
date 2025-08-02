@@ -30,6 +30,7 @@ jobs:
           script: |
             const tags = '${{ steps.tags.outputs.tags }}'.split(' ').filter(Boolean);
             for (const tag of tags) {
+              // Dispatch the workflow
               await github.rest.actions.createWorkflowDispatch({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -37,5 +38,48 @@ jobs:
                 ref: context.ref.replace('refs/heads/', ''),
                 inputs: { tag }
               });
-              await new Promise(resolve => setTimeout(resolve, 15000));
+
+              // Wait for the workflow run to start
+              let runId = null;
+              for (let i = 0; i < 20; i++) { // Try for up to 100 seconds
+                const runs = await github.rest.actions.listWorkflowRuns({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: 'docker.yml',
+                  event: 'workflow_dispatch',
+                  status: 'in_progress'
+                });
+                const found = runs.data.workflow_runs.find(run =>
+                  run.head_branch === context.ref.replace('refs/heads/', '') &&
+                  run.display_title.includes(tag)
+                );
+                if (found) {
+                  runId = found.id;
+                  break;
+                }
+                await new Promise(resolve => setTimeout(resolve, 5000));
+              }
+              if (!runId) {
+                core.setFailed(`Could not find workflow run for tag ${tag}`);
+                return;
+              }
+
+              // Wait for the workflow run to complete
+              let completed = false;
+              while (!completed) {
+                const run = await github.rest.actions.getWorkflowRun({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: runId
+                });
+                if (run.data.status === 'completed') {
+                  if (run.data.conclusion !== 'success') {
+                    core.setFailed(`Workflow for tag ${tag} failed with conclusion: ${run.data.conclusion}`);
+                    return;
+                  }
+                  completed = true;
+                } else {
+                  await new Promise(resolve => setTimeout(resolve, 15000));
+                }
+              }
             }
