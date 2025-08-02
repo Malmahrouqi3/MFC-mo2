@@ -45,4 +45,4 @@ RUN echo "TARGET=$TARGET CC=$CC_COMPILER FC=$FC_COMPILER" && \
     fi
 
 WORKDIR /opt/MFC
-ENTRYPOINT ["bash"]
+ENTRYPOINT ["tail", "-f", "/dev/null"]
