@@ -14,7 +14,7 @@ jobs:
       matrix:
         config:
           - { name: 'cpu', platform: 'amd64', base_image: 'ubuntu:22.04'}
-          - { name: 'cpu', platform: 'arm64', base_image: 'ubuntu:22.04'}
+          - { name: 'cpu', platform: 'amd64', base_image: 'ubuntu:25.10'}
           # - { name: 'gpu', platform: 'amd64', base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04'}
           # - { name: 'gpu', platform: 'arm64', base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04'}
 
@@ -28,8 +28,8 @@ jobs:
       - name: Setup
         uses: docker/setup-buildx-action@v3
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+      # - name: Set up QEMU
+      #   uses: docker/setup-qemu-action@v3
 
       - name: Checkout base repo
         run: |
@@ -100,7 +100,7 @@ jobs:
             FC_COMPILER=${{ contains(matrix.config.name, 'gpu') && 'nvfortran' || 'gfortran' }}
             COMPILER_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin' || '/usr/bin' }}
             COMPILER_LD_LIBRARY_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib' || '/usr/lib' }}
-          tags: malmahrouqi/mfc:${{ github.event.inputs.tag }}-${{ matrix.config.name }}-${{ matrix.config.platform }}
+          tags: malmahrouqi/mfc:${{ github.event.inputs.tag }}-${{ matrix.config.name }}-${{ matrix.config.platform }}-${{ matrix.config.base_image }}
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -118,8 +118,8 @@ jobs:
       - name: Create and push multi-arch manifests
         run: |
           docker manifest create malmahrouqi/mfc:${{ github.event.inputs.tag }}-cpu \
-            malmahrouqi/mfc:${{ github.event.inputs.tag }}-cpu-amd64 \
-            malmahrouqi/mfc:${{ github.event.inputs.tag }}-cpu-arm64
+            malmahrouqi/mfc:${{ github.event.inputs.tag }}-cpu-amd64-ubuntu:22.04 \
+            malmahrouqi/mfc:${{ github.event.inputs.tag }}-cpu-amd64-ubuntu:25.10
           docker manifest push malmahrouqi/mfc:${{ github.event.inputs.tag }}-cpu
 
           # docker manifest create malmahrouqi/mfc:${{ github.event.inputs.tag }}-gpu \
