@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       from_tag:
-        description: 'Start tag (e.g. v4.0.0)'
+        description: 'Start tag (e.g. v4.3.0)'
         required: true
       to_tag:
         description: 'End tag (e.g. v5.0.5)'
@@ -37,4 +37,5 @@ jobs:
                 ref: context.ref.replace('refs/heads/', ''),
                 inputs: { tag }
               });
+              await new Promise(resolve => setTimeout(resolve, 15000));
             }
