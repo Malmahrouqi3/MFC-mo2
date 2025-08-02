@@ -39,7 +39,7 @@ jobs:
               });
 
               let runId = null;
-              for (let i = 0; i < 20; i++) { // Try for up to 100 seconds
+              for (let i = 0; i < 60; i++) { // Try for up to 300 seconds
                 const runs = await github.rest.actions.listWorkflowRuns({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
