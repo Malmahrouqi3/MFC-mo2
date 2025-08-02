@@ -233,12 +233,78 @@ jobs:
                 timeout 300 valgrind $flags "$SIM_EXE" 2>&1 || true
               ) > "$out_file"
               
-              # Check for errors immediately
-              if grep -qE "ERROR SUMMARY: [1-9][0-9]*|nan|inf|abort|segmentation" "$out_file"; then
-                echo "🔍 Enhanced detection found issues in $case_name:"
-                grep -E "ERROR SUMMARY:|nan|inf|abort|segmentation" "$out_file" | head -10
+              # Check for actual errors (not just ERROR SUMMARY: 0)
+              has_errors=false
+              
+              # Check for non-zero error summary
+              if grep -qE "ERROR SUMMARY: [1-9][0-9]*" "$out_file"; then
+                echo "🔍 Valgrind errors detected in $case_name with $flags:"
+                grep -A 10 -B 2 "ERROR SUMMARY: [1-9]" "$out_file"
+                has_errors=true
+              fi
+              
+              # Check for NaN/Inf in output
+              if grep -qi "nan\|inf" "$out_file" | grep -v "ERROR SUMMARY"; then
+                echo "🔍 NaN/Inf detected in $case_name with $flags:"
+                grep -i "nan\|inf" "$out_file" | grep -v "ERROR SUMMARY" | head -5
+                has_errors=true
+              fi
+              
+              # Check for crashes/segfaults
+              if grep -qi "segmentation\|abort\|crash\|killed\|fatal" "$out_file"; then
+                echo "🔍 Crash detected in $case_name with $flags:"
+                grep -i "segmentation\|abort\|crash\|killed\|fatal" "$out_file" | head -5
+                has_errors=true
+              fi
+              
+              # Check for Verrou-specific numerical instability messages
+              if grep -qi "verrou.*detected\|numerical.*instability\|floating.*point.*error" "$out_file"; then
+                echo "🔍 Numerical instability detected in $case_name with $flags:"
+                grep -i "verrou.*detected\|numerical.*instability\|floating.*point.*error" "$out_file" | head -5
+                has_errors=true
+              fi
+              
+              # Check if valgrind failed to run properly
+              if grep -q "valgrind: Use --help" "$out_file"; then
+                echo "⚠️ Valgrind command failed for $case_name with $flags - invalid arguments"
+                echo "Command: valgrind $flags"
+                continue
+              fi
+              
+              if [ "$has_errors" = false ]; then
+                echo "✅ No issues detected in $case_name with $flags"
               fi
             done
+            
+            # Compare results across different rounding modes for this case
+            echo "Analyzing numerical consistency for $case_name across rounding modes..."
+            ref_result=""
+            inconsistent=false
+            
+            for mode_file in "enhanced_reports/${case_name}"_*.log; do
+              if [ -f "$mode_file" ]; then
+                # Extract any numerical output for comparison
+                result=$(grep -oE "[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?" "$mode_file" | head -1)
+                if [ -n "$result" ]; then
+                  if [ -z "$ref_result" ]; then
+                    ref_result="$result"
+                  else
+                    # Simple numerical comparison (can be enhanced)
+                    if ! echo "$result $ref_result" | awk '{if(($1-$2)^2/($2^2) > 1e-10) exit 1}' 2>/dev/null; then
+                      echo "⚠️ Numerical inconsistency detected in $case_name:"
+                      echo "  Reference: $ref_result"
+                      echo "  Current: $result"
+                      echo "  File: $(basename "$mode_file")"
+                      inconsistent=true
+                    fi
+                  fi
+                fi
+              fi
+            done
+            
+            if [ "$inconsistent" = false ] && [ -n "$ref_result" ]; then
+              echo "✅ Numerical results consistent across rounding modes for $case_name"
+            fi
           done
 
       - name: Statistical Analysis
