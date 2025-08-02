@@ -131,10 +131,13 @@ jobs:
               sys.exit(0 if success else 1)
           EOF
 
+
+
       - name: Compare Rounding Modes
         run: |
           echo "Comparing results between rounding modes..."
           comparison_failed=false
+          error_detected=false
           
           for case_dir in examples/*/; do
             case_name=$(basename "$case_dir")
@@ -143,10 +146,25 @@ jobs:
             ref_file="verrou_reports/${case_name}___tool_verrou__s___rounding_mode_nearest.log"
             
             if [ -f "$ref_file" ]; then
+              # Check for Verrou-detected errors first
+              if grep -qE "ERROR SUMMARY: [1-9][0-9]*" "$ref_file"; then
+                echo "🔍 Verrou detected errors in $case_name (nearest mode):"
+                grep -A 5 -B 2 "ERROR SUMMARY:" "$ref_file"
+                error_detected=true
+              fi
+              
               for mode in "average_comdet" "random"; do
                 test_file="verrou_reports/${case_name}___tool_verrou__s___rounding_mode_${mode}.log"
                 
                 if [ -f "$test_file" ]; then
+                  # Check for Verrou-detected errors
+                  if grep -qE "ERROR SUMMARY: [1-9][0-9]*" "$test_file"; then
+                    echo "🔍 Verrou detected errors in $case_name ($mode mode):"
+                    grep -A 5 -B 2 "ERROR SUMMARY:" "$test_file"
+                    error_detected=true
+                  fi
+                  
+                  # Compare numerical results
                   echo "Comparing $case_name: nearest vs $mode"
                   if ! python3 compare_results.py "$ref_file" "$test_file"; then
                     echo "⚠️ Significant difference detected in $case_name ($mode vs nearest)"
@@ -156,16 +174,155 @@ jobs:
                   fi
                 fi
               done
+              
+              # Additional analysis: Check for NaN, Inf, or suspicious patterns
+              for mode_file in "verrou_reports/${case_name}"_*.log; do
+                if [ -f "$mode_file" ]; then
+                  if grep -qi "nan\|inf\|segmentation\|abort\|crash" "$mode_file"; then
+                    echo "🚨 Suspicious patterns found in $(basename "$mode_file"):"
+                    grep -i "nan\|inf\|segmentation\|abort\|crash" "$mode_file"
+                    error_detected=true
+                  fi
+                fi
+              done
             fi
           done
           
-          if [ "$comparison_failed" = true ]; then
+          if [ "$error_detected" = true ]; then
+            echo "🚨 Floating-point errors detected by Verrou!"
+          elif [ "$comparison_failed" = true ]; then
             echo "⚠️ Some cases showed significant floating-point sensitivity"
-            # Don't fail the workflow, just warn
           else
             echo "✅ All cases show acceptable floating-point stability"
           fi
 
+      - name: Enhanced Error Detection
+        run: |
+          echo "Performing enhanced floating-point error detection..."
+          
+          # Create a more aggressive Verrou analysis
+          export PATH="$HOME/.local/bin:$PATH"
+          mkdir -p enhanced_reports
+          
+          SIM_EXE=$(find "$PWD/build/staging" -type f -name simulation | head -n 1)
+          
+          # Try more aggressive Verrou modes
+          for inp in examples/*/simulation.inp; do
+            case_dir=$(dirname "$inp")
+            case_name=$(basename "$case_dir")
+            run_dir="enhanced_run_$case_name"
+            mkdir -p "$run_dir"
+            cp "$case_dir"/* "$run_dir"/ 2>/dev/null || true
+            cp -r "$case_dir"/restart_data "$run_dir"/ 2>/dev/null || true
+            
+            # More aggressive detection modes
+            for flags in \
+              "--tool=verrou -s --rounding-mode=random --seed=42" \
+              "--tool=verrou -s --rounding-mode=random --seed=123" \
+              "--tool=verrou -s --rounding-mode=random --seed=456" \
+              "--tool=verrou -s --rounding-mode=upward" \
+              "--tool=verrou -s --rounding-mode=downward" \
+              "--tool=verrou -s --rounding-mode=toward_zero"
+            do
+              flag_name=$(echo $flags | tr ' ' '_' | tr -d '=*?:"<>|' | sed 's/__/_/g')
+              out_file="enhanced_reports/${case_name}_${flag_name}.log"
+              
+              echo "Running enhanced test: $case_name with $flags"
+              (
+                cd "$run_dir"
+                timeout 300 valgrind $flags "$SIM_EXE" 2>&1 || true
+              ) > "$out_file"
+              
+              # Check for errors immediately
+              if grep -qE "ERROR SUMMARY: [1-9][0-9]*|nan|inf|abort|segmentation" "$out_file"; then
+                echo "🔍 Enhanced detection found issues in $case_name:"
+                grep -E "ERROR SUMMARY:|nan|inf|abort|segmentation" "$out_file" | head -10
+              fi
+            done
+          done
+
+      - name: Statistical Analysis
+        run: |
+          cat > statistical_analysis.py << 'EOF'
+          import os
+          import re
+          import statistics
+          import sys
+          
+          def extract_all_values(case_name):
+              """Extract all values for a case across different modes"""
+              values = []
+              pattern = r'result[s]*\s*[=:]\s*([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)'
+              
+              for root, dirs, files in os.walk('.'):
+                  for file in files:
+                      if case_name in file and file.endswith('.log'):
+                          filepath = os.path.join(root, file)
+                          try:
+                              with open(filepath, 'r') as f:
+                                  content = f.read()
+                                  matches = re.findall(pattern, content, re.IGNORECASE)
+                                  for match in matches:
+                                      try:
+                                          val = float(match[0])
+                                          if not (val != val or val == float('inf') or val == float('-inf')):  # Not NaN or Inf
+                                              values.append((val, file))
+                                      except:
+                                          pass
+                          except:
+                              pass
+              return values
+          
+          def analyze_stability(values):
+              """Analyze numerical stability"""
+              if len(values) < 2:
+                  return "Insufficient data"
+              
+              nums = [v[0] for v in values]
+              mean_val = statistics.mean(nums)
+              std_val = statistics.stdev(nums) if len(nums) > 1 else 0
+              
+              # Calculate coefficient of variation
+              cv = (std_val / abs(mean_val)) if mean_val != 0 else float('inf')
+              
+              print(f"Values found: {len(nums)}")
+              print(f"Mean: {mean_val}")
+              print(f"Std Dev: {std_val}")
+              print(f"Coefficient of Variation: {cv}")
+              print(f"Min: {min(nums)}")
+              print(f"Max: {max(nums)}")
+              
+              if cv > 1e-10:
+                  print("⚠️ HIGH VARIABILITY DETECTED - Potential floating-point instability")
+                  return False
+              else:
+                  print("✅ Low variability - Numerically stable")
+                  return True
+          
+          # Analyze each case
+          cases = set()
+          for root, dirs, files in os.walk('.'):
+              for file in files:
+                  if file.endswith('.log'):
+                      # Extract case name from filename
+                      parts = file.split('_')
+                      if len(parts) > 0:
+                          cases.add(parts[0])
+          
+          overall_stable = True
+          for case in sorted(cases):
+              print(f"\n=== Statistical Analysis for {case} ===")
+              values = extract_all_values(case)
+              stable = analyze_stability(values)
+              if not stable:
+                  overall_stable = False
+          
+          sys.exit(0 if overall_stable else 1)
+          EOF
+          
+          echo "Running statistical analysis on all results..."
+          python3 statistical_analysis.py
+  
       - name: Display Results
         run: |
           echo "Verrou reports:"
