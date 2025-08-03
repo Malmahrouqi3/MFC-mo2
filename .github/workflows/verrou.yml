@@ -195,18 +195,15 @@ jobs:
           else
             echo "✅ All cases show acceptable floating-point stability"
           fi
-      
       - name: Enhanced Error Detection
         run: |
-          echo "Performing enhanced floating-point error detection..."
+          echo "Performing rigorous floating-point error detection..."
           
-          # Create a more aggressive Verrou analysis
           export PATH="$HOME/.local/bin:$PATH"
-          mkdir -p enhanced_reports
+          mkdir -p enhanced_reports results_analysis
           
           SIM_EXE=$(find "$PWD/build/staging" -type f -name simulation | head -n 1)
           
-          # Try more aggressive Verrou modes (corrected syntax)
           for inp in examples/*/simulation.inp; do
             case_dir=$(dirname "$inp")
             case_name=$(basename "$case_dir")
@@ -215,89 +212,269 @@ jobs:
             cp "$case_dir"/* "$run_dir"/ 2>/dev/null || true
             cp -r "$case_dir"/restart_data "$run_dir"/ 2>/dev/null || true
             
-            # Valid Verrou detection modes only
-            for flags in \
-              "--tool=verrou --rounding-mode=random" \
-              "--tool=verrou --rounding-mode=upward" \
-              "--tool=verrou --rounding-mode=downward" \
-              "--tool=verrou --rounding-mode=toward_zero" \
-              "--tool=verrou --rounding-mode=farthest" \
-              "--tool=verrou --rounding-mode=average" \
-              "--tool=verrou --check-nan=yes" \
-              "--tool=verrou --count-op=add" \
-              "--tool=verrou --count-op=mul"
-            do
-              flag_name=$(echo $flags | tr ' ' '_' | tr -d '=*?:"<>|' | sed 's/__/_/g')
-              out_file="enhanced_reports/${case_name}_${flag_name}.log"
+            echo "=== Rigorous Analysis for $case_name ==="
+            
+            # 1. Multiple runs with different rounding modes + result extraction
+            declare -A results
+            modes=(
+              "nearest:--tool=verrou --rounding-mode=nearest"
+              "random:--tool=verrou --rounding-mode=random"
+              "upward:--tool=verrou --rounding-mode=upward"
+              "downward:--tool=verrou --rounding-mode=downward"
+              "toward_zero:--tool=verrou --rounding-mode=toward_zero"
+              "farthest:--tool=verrou --rounding-mode=farthest"
+              "average:--tool=verrou --rounding-mode=average"
+            )
+            
+            for mode_pair in "${modes[@]}"; do
+              mode_name=${mode_pair%%:*}
+              flags=${mode_pair#*:}
+              out_file="enhanced_reports/${case_name}_${mode_name}.log"
               
-              echo "Running enhanced test: $case_name with $flags"
+              echo "Running $case_name with $mode_name rounding..."
               (
                 cd "$run_dir"
-                timeout 300 valgrind $flags "$SIM_EXE" 2>&1 || true
-              ) > "$out_file"
+                timeout 300 valgrind $flags "$SIM_EXE" > "../${case_name}_${mode_name}_output.txt" 2> "../$out_file" || true
+              )
               
-              # Check for actual errors only
-              has_errors=false
+              # Extract numerical results from simulation output
+              if [ -f "${case_name}_${mode_name}_output.txt" ]; then
+                # Look for final numerical values (adapt patterns as needed)
+                result=$(grep -E "(final|result|output|value).*[=:].*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?" "${case_name}_${mode_name}_output.txt" | \
+                         grep -oE "[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?" | tail -1)
+                
+                if [ -n "$result" ]; then
+                  results["$mode_name"]="$result"
+                  echo "$mode_name: $result" >> "results_analysis/${case_name}_results.txt"
+                fi
+              fi
               
-              # Check for non-zero error summary
+              # Check for Valgrind errors
               if grep -qE "ERROR SUMMARY: [1-9][0-9]*" "$out_file"; then
-                echo "🔍 Valgrind errors detected in $case_name with $flags:"
-                grep -A 10 -B 2 "ERROR SUMMARY: [1-9]" "$out_file"
-                has_errors=true
+                echo "🚨 Valgrind detected errors in $case_name ($mode_name):"
+                grep -A 5 "ERROR SUMMARY: [1-9]" "$out_file"
               fi
               
-              # Check for actual NaN/Inf in simulation output (exclude Valgrind headers)
-              if grep -v "^==" "$out_file" | grep -qE "\b(nan|inf)\b" | grep -v "valgrind:"; then
-                echo "🔍 NaN/Inf detected in simulation output for $case_name with $flags:"
-                grep -v "^==" "$out_file" | grep -iE "\b(nan|inf)\b" | grep -v "valgrind:" | head -5
-                has_errors=true
-              fi
-              
-              # Check for crashes/segfaults
-              if grep -qE "segmentation fault|abort|crash|killed|fatal error" "$out_file"; then
-                echo "🔍 Crash detected in $case_name with $flags:"
-                grep -E "segmentation fault|abort|crash|killed|fatal error" "$out_file" | head -5
-                has_errors=true
-              fi
-              
-              # Check for actual Verrou error messages (not just info)
-              if grep -qE "VERROU ERROR|floating point exception|numerical error" "$out_file"; then
-                echo "🔍 Verrou error detected in $case_name with $flags:"
-                grep -E "VERROU ERROR|floating point exception|numerical error" "$out_file" | head -5
-                has_errors=true
-              fi
-              
-              # Check for significant numerical discrepancies
-              if grep -qE "significant.*difference|backend.*disagree" "$out_file"; then
-                echo "🔍 Numerical discrepancy detected in $case_name with $flags:"
-                grep -E "significant.*difference|backend.*disagree" "$out_file" | head -5
-                has_errors=true
-              fi
-              
-              # Check if valgrind failed to run properly
-              if grep -q "valgrind: Use --help\|unrecognised option\|invalid option\|Bad option" "$out_file"; then
-                echo "⚠️ Valgrind command failed for $case_name with $flags"
-                continue
-              fi
-              
-              if [ "$has_errors" = false ]; then
-                echo "✅ No floating-point issues detected in $case_name with $flags"
+              # Check for runtime issues
+              if grep -qE "nan|inf|segmentation|abort|crash" "$out_file" "${case_name}_${mode_name}_output.txt" 2>/dev/null; then
+                echo "🚨 Runtime issues detected in $case_name ($mode_name):"
+                grep -E "nan|inf|segmentation|abort|crash" "$out_file" "${case_name}_${mode_name}_output.txt" 2>/dev/null | head -3
               fi
             done
             
-            # Analyze all results for this case
-            echo "=== Summary for $case_name ==="
-            error_count=$(find enhanced_reports -name "${case_name}_*.log" -exec grep -l "ERROR SUMMARY: [1-9]" {} \; | wc -l)
-            total_count=$(find enhanced_reports -name "${case_name}_*.log" | wc -l)
-            
-            if [ "$error_count" -gt 0 ]; then
-              echo "⚠️ $case_name: $error_count out of $total_count tests detected issues"
-            else
-              echo "✅ $case_name: All $total_count tests passed without issues"
-            fi
+            # 2. Statistical analysis of results
+            if [ -f "results_analysis/${case_name}_results.txt" ]; then
+              echo "Analyzing numerical stability for $case_name..."
+              python3 - << EOF
+import sys
+import statistics
+import math
 
-            echo "=============================="
+results = {}
+with open("results_analysis/${case_name}_results.txt", "r") as f:
+    for line in f:
+        if ":" in line:
+            mode, value = line.strip().split(":", 1)
+            try:
+                results[mode.strip()] = float(value.strip())
+            except ValueError:
+                pass
+
+if len(results) < 2:
+    print("Insufficient numerical results for analysis")
+    sys.exit(0)
+
+values = list(results.values())
+mean_val = statistics.mean(values)
+std_val = statistics.stdev(values) if len(values) > 1 else 0
+cv = (std_val / abs(mean_val)) if mean_val != 0 else float('inf')
+
+print(f"📊 Numerical Analysis for ${case_name}:")
+print(f"   Results found: {len(values)}")
+print(f"   Mean: {mean_val:.10e}")
+print(f"   Std Dev: {std_val:.10e}")
+print(f"   Coefficient of Variation: {cv:.10e}")
+print(f"   Min: {min(values):.10e}")
+print(f"   Max: {max(values):.10e}")
+print(f"   Range: {max(values) - min(values):.10e}")
+
+# Detailed comparison
+if len(results) > 1:
+    print(f"   Mode-wise results:")
+    for mode, val in results.items():
+        rel_diff = abs(val - mean_val) / abs(mean_val) if mean_val != 0 else abs(val)
+        print(f"     {mode}: {val:.10e} (rel_diff: {rel_diff:.2e})")
+
+# Sensitivity thresholds
+if cv > 1e-12:
+    print("⚠️  MODERATE SENSITIVITY detected")
+    if cv > 1e-8:
+        print("🚨 HIGH SENSITIVITY detected - Significant floating-point dependency")
+    elif cv > 1e-10:
+        print("⚠️  MEDIUM SENSITIVITY detected - Notable floating-point effects")
+else:
+    print("✅ LOW SENSITIVITY - Numerically robust")
+
+# Pairwise comparisons
+print(f"   Pairwise relative differences:")
+modes = list(results.keys())
+max_diff = 0
+for i in range(len(modes)):
+    for j in range(i+1, len(modes)):
+        val1, val2 = results[modes[i]], results[modes[j]]
+        rel_diff = abs(val1 - val2) / max(abs(val1), abs(val2)) if max(abs(val1), abs(val2)) != 0 else 0
+        max_diff = max(max_diff, rel_diff)
+        if rel_diff > 1e-10:
+            print(f"     {modes[i]} vs {modes[j]}: {rel_diff:.2e}")
+
+if max_diff > 1e-6:
+    print("🚨 CRITICAL: Large differences between rounding modes!")
+    sys.exit(1)
+elif max_diff > 1e-10:
+    print("⚠️  WARNING: Noticeable differences between rounding modes")
+EOF
+            else
+              echo "❌ No numerical results extracted for $case_name"
+            fi
+            
+            # 3. Multiple random runs for stochastic analysis
+            echo "Performing stochastic analysis for $case_name..."
+            random_results=()
+            for seed in {1..5}; do
+              echo "Random run $seed for $case_name..."
+              (
+                cd "$run_dir"
+                VERROU_ROUNDING_MODE=random timeout 180 valgrind --tool=verrou --rounding-mode=random "$SIM_EXE" > "../${case_name}_random_${seed}_output.txt" 2>/dev/null || true
+              )
+              
+              if [ -f "${case_name}_random_${seed}_output.txt" ]; then
+                result=$(grep -E "(final|result|output|value).*[=:].*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?" "${case_name}_random_${seed}_output.txt" | \
+                         grep -oE "[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?" | tail -1)
+                if [ -n "$result" ]; then
+                  random_results+=("$result")
+                fi
+              fi
+            done
+            
+            if [ ${#random_results[@]} -gt 2 ]; then
+              python3 - << EOF
+import statistics
+results = [${random_results[*]}]
+mean_val = statistics.mean(results)
+std_val = statistics.stdev(results)
+cv = (std_val / abs(mean_val)) if mean_val != 0 else float('inf')
+
+print(f"🎲 Stochastic Analysis for ${case_name}:")
+print(f"   Random runs: {len(results)}")
+print(f"   Mean: {mean_val:.10e}")
+print(f"   Std Dev: {std_val:.10e}")
+print(f"   CV: {cv:.10e}")
+
+if cv > 1e-8:
+    print("🚨 HIGH STOCHASTIC VARIABILITY - Code highly sensitive to rounding")
+elif cv > 1e-12:
+    print("⚠️  MODERATE STOCHASTIC VARIABILITY detected")
+else:
+    print("✅ LOW STOCHASTIC VARIABILITY - Consistent across random runs")
+EOF
+            fi
+            
+            echo "==============================="
           done
+
+      - name: Advanced Numerical Analysis
+        run: |
+          echo "Performing advanced numerical stability analysis..."
+          
+          # Create comprehensive stability report
+          cat > stability_analysis.py << 'EOF'
+          import os
+          import re
+          import statistics
+          import math
+          
+          def analyze_case_stability():
+              cases = {}
+              
+              # Read all results
+              for filename in os.listdir('results_analysis'):
+                  if filename.endswith('_results.txt'):
+                      case_name = filename.replace('_results.txt', '')
+                      cases[case_name] = {}
+                      
+                      with open(f'results_analysis/{filename}', 'r') as f:
+                          for line in f:
+                              if ':' in line:
+                                  mode, value = line.strip().split(':', 1)
+                                  try:
+                                      cases[case_name][mode.strip()] = float(value.strip())
+                                  except ValueError:
+                                      pass
+              
+              print("🔍 COMPREHENSIVE FLOATING-POINT STABILITY ANALYSIS")
+              print("=" * 60)
+              
+              overall_issues = 0
+              critical_issues = 0
+              
+              for case_name, results in cases.items():
+                  if len(results) < 2:
+                      continue
+                  
+                  values = list(results.values())
+                  mean_val = statistics.mean(values)
+                  std_val = statistics.stdev(values) if len(values) > 1 else 0
+                  cv = (std_val / abs(mean_val)) if mean_val != 0 else float('inf')
+                  
+                  print(f"\n📊 {case_name}:")
+                  
+                  # Determine stability level
+                  if cv > 1e-6:
+                      print(f"   🚨 CRITICAL INSTABILITY (CV: {cv:.2e})")
+                      critical_issues += 1
+                  elif cv > 1e-10:
+                      print(f"   ⚠️  MODERATE INSTABILITY (CV: {cv:.2e})")
+                      overall_issues += 1
+                  else:
+                      print(f"   ✅ STABLE (CV: {cv:.2e})")
+                  
+                  # Show significant digits lost
+                  if cv > 0:
+                      digits_lost = -math.log10(cv)
+                      print(f"   📉 Approximate significant digits affected: {max(0, 16-digits_lost):.1f}/16")
+                  
+                  # Worst case scenario
+                  max_val, min_val = max(values), min(values)
+                  worst_case_error = (max_val - min_val) / abs(mean_val) if mean_val != 0 else 0
+                  if worst_case_error > 1e-10:
+                      print(f"   📈 Worst-case relative error: {worst_case_error:.2e}")
+              
+              print(f"\n" + "=" * 60)
+              print(f"📈 SUMMARY:")
+              print(f"   Total cases analyzed: {len(cases)}")
+              print(f"   Critical issues: {critical_issues}")
+              print(f"   Moderate issues: {overall_issues}")
+              print(f"   Stable cases: {len(cases) - critical_issues - overall_issues}")
+              
+              if critical_issues > 0:
+                  print(f"\n🚨 RECOMMENDATION: {critical_issues} cases show critical floating-point sensitivity!")
+                  print(f"   Consider reviewing numerical algorithms in these cases.")
+                  return False
+              elif overall_issues > 0:
+                  print(f"\n⚠️  RECOMMENDATION: {overall_issues} cases show moderate sensitivity.")
+                  print(f"   Monitor these cases for numerical stability.")
+              else:
+                  print(f"\n✅ EXCELLENT: All cases demonstrate good numerical stability.")
+              
+              return True
+          
+          if __name__ == "__main__":
+              import sys
+              stable = analyze_case_stability()
+              sys.exit(0 if stable else 1)
+          EOF
+          
+          python3 stability_analysis.py
 
       - name: Statistical Analysis
         run: |
