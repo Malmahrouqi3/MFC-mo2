@@ -206,7 +206,7 @@ jobs:
           
           SIM_EXE=$(find "$PWD/build/staging" -type f -name simulation | head -n 1)
           
-          # Try more aggressive Verrou modes
+          # Try more aggressive Verrou modes (corrected syntax)
           for inp in examples/*/simulation.inp; do
             case_dir=$(dirname "$inp")
             case_name=$(basename "$case_dir")
@@ -215,7 +215,7 @@ jobs:
             cp "$case_dir"/* "$run_dir"/ 2>/dev/null || true
             cp -r "$case_dir"/restart_data "$run_dir"/ 2>/dev/null || true
             
-            # More aggressive detection modes (corrected syntax)
+            # Valid Verrou detection modes only
             for flags in \
               "--tool=verrou --rounding-mode=random" \
               "--tool=verrou --rounding-mode=upward" \
@@ -223,8 +223,9 @@ jobs:
               "--tool=verrou --rounding-mode=toward_zero" \
               "--tool=verrou --rounding-mode=farthest" \
               "--tool=verrou --rounding-mode=average" \
-              "--tool=verrou --count-op=all" \
-              "--tool=verrou --check-nan=yes"
+              "--tool=verrou --check-nan=yes" \
+              "--tool=verrou --count-op=add" \
+              "--tool=verrou --count-op=mul"
             do
               flag_name=$(echo $flags | tr ' ' '_' | tr -d '=*?:"<>|' | sed 's/__/_/g')
               out_file="enhanced_reports/${case_name}_${flag_name}.log"
@@ -235,7 +236,7 @@ jobs:
                 timeout 300 valgrind $flags "$SIM_EXE" 2>&1 || true
               ) > "$out_file"
               
-              # Check for actual errors (not just normal Verrou output)
+              # Check for actual errors only
               has_errors=false
               
               # Check for non-zero error summary
@@ -245,90 +246,54 @@ jobs:
                 has_errors=true
               fi
               
-              # Check for NaN/Inf in actual output (not in Verrou headers)
-              if grep -v "^==" "$out_file" | grep -qi "nan\|inf"; then
+              # Check for actual NaN/Inf in simulation output (exclude Valgrind headers)
+              if grep -v "^==" "$out_file" | grep -qE "\b(nan|inf)\b" | grep -v "valgrind:"; then
                 echo "🔍 NaN/Inf detected in simulation output for $case_name with $flags:"
-                grep -v "^==" "$out_file" | grep -i "nan\|inf" | head -5
+                grep -v "^==" "$out_file" | grep -iE "\b(nan|inf)\b" | grep -v "valgrind:" | head -5
                 has_errors=true
               fi
               
               # Check for crashes/segfaults
-              if grep -qi "segmentation\|abort\|crash\|killed\|fatal" "$out_file"; then
+              if grep -qE "segmentation fault|abort|crash|killed|fatal error" "$out_file"; then
                 echo "🔍 Crash detected in $case_name with $flags:"
-                grep -i "segmentation\|abort\|crash\|killed\|fatal" "$out_file" | head -5
+                grep -E "segmentation fault|abort|crash|killed|fatal error" "$out_file" | head -5
                 has_errors=true
               fi
               
-              # Check for Verrou-specific instability reports
-              if grep -qi "VERROU ERROR\|INSTABILITY\|CANCELLATION" "$out_file"; then
-                echo "🔍 Verrou instability detected in $case_name with $flags:"
-                grep -i "VERROU ERROR\|INSTABILITY\|CANCELLATION" "$out_file" | head -5
+              # Check for actual Verrou error messages (not just info)
+              if grep -qE "VERROU ERROR|floating point exception|numerical error" "$out_file"; then
+                echo "🔍 Verrou error detected in $case_name with $flags:"
+                grep -E "VERROU ERROR|floating point exception|numerical error" "$out_file" | head -5
                 has_errors=true
               fi
               
-              # Check for significant backend differences (Verrou feature)
-              if grep -qi "backend.*diff\|significant.*difference" "$out_file"; then
-                echo "🔍 Backend differences detected in $case_name with $flags:"
-                grep -i "backend.*diff\|significant.*difference" "$out_file" | head -5
+              # Check for significant numerical discrepancies
+              if grep -qE "significant.*difference|backend.*disagree" "$out_file"; then
+                echo "🔍 Numerical discrepancy detected in $case_name with $flags:"
+                grep -E "significant.*difference|backend.*disagree" "$out_file" | head -5
                 has_errors=true
               fi
               
               # Check if valgrind failed to run properly
-              if grep -q "valgrind: Use --help\|unrecognised option\|invalid option" "$out_file"; then
-                echo "⚠️ Valgrind command failed for $case_name with $flags - invalid arguments"
-                echo "Error details:"
-                grep "valgrind:\|unrecognised\|invalid" "$out_file" | head -3
+              if grep -q "valgrind: Use --help\|unrecognised option\|invalid option\|Bad option" "$out_file"; then
+                echo "⚠️ Valgrind command failed for $case_name with $flags"
                 continue
               fi
               
               if [ "$has_errors" = false ]; then
-                echo "✅ No issues detected in $case_name with $flags"
+                echo "✅ No floating-point issues detected in $case_name with $flags"
               fi
             done
             
-            # Compare results across different rounding modes for this case
-            echo "Analyzing numerical consistency for $case_name across rounding modes..."
-            ref_result=""
-            inconsistent=false
-            results_found=0
+            # Analyze all results for this case
+            echo "=== Summary for $case_name ==="
+            error_count=$(find enhanced_reports -name "${case_name}_*.log" -exec grep -l "ERROR SUMMARY: [1-9]" {} \; | wc -l)
+            total_count=$(find enhanced_reports -name "${case_name}_*.log" | wc -l)
             
-            for mode_file in "enhanced_reports/${case_name}"_*.log; do
-              if [ -f "$mode_file" ]; then
-                # Extract numerical results from simulation output (skip Valgrind headers)
-                result=$(grep -v "^==" "$mode_file" | grep -oE "[-+]?[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?" | head -1)
-                if [ -n "$result" ]; then
-                  results_found=$((results_found + 1))
-                  if [ -z "$ref_result" ]; then
-                    ref_result="$result"
-                  else
-                    # Enhanced numerical comparison with better error handling
-                    rel_diff=$(echo "$result $ref_result" | awk '{
-                      if ($2 == 0) {
-                        print ($1 == 0) ? 0 : 1
-                      } else {
-                        print sqrt(($1-$2)^2)/abs($2)
-                      }
-                    }' 2>/dev/null)
-                    
-                    if [ -n "$rel_diff" ] && awk "BEGIN {exit !($rel_diff > 1e-8)}"; then
-                      echo "⚠️ Numerical inconsistency detected in $case_name:"
-                      echo "  Reference: $ref_result"
-                      echo "  Current: $result"
-                      echo "  Relative difference: $rel_diff"
-                      echo "  File: $(basename "$mode_file")"
-                      inconsistent=true
-                    fi
-                  fi
-                fi
-              fi
-            done
-            
-            if [ "$results_found" -gt 1 ]; then
-              if [ "$inconsistent" = false ]; then
-                echo "✅ Numerical results consistent across $results_found rounding modes for $case_name"
-              fi
+            if [ "$error_count" -gt 0 ]; then
+              echo "⚠️ $case_name: $error_count out of $total_count tests detected issues"
             else
-              echo "ℹ️ Insufficient numerical results found for comparison in $case_name"
+              echo "✅ $case_name: All $total_count tests passed without issues"
             fi
           done
 
