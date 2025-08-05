@@ -125,7 +125,17 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/mfc:${{ github.event.inputs.tag }}-cpu-ubuntu-22.04-arm
           docker manifest push ${{ secrets.DOCKERHUB_USERNAME }}/mfc:${{ github.event.inputs.tag }}-cpu
 
+          docker manifest create ${{ secrets.DOCKERHUB_USERNAME }}/mfc:latest-cpu \
+            ${{ secrets.DOCKERHUB_USERNAME }}/mfc:${{ github.event.inputs.tag }}-cpu-ubuntu-22.04 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/mfc:${{ github.event.inputs.tag }}-cpu-ubuntu-22.04-arm
+          docker manifest push ${{ secrets.DOCKERHUB_USERNAME }}/mfc:latest-cpu
+
           docker manifest create ${{ secrets.DOCKERHUB_USERNAME }}/mfc:${{ github.event.inputs.tag }}-gpu \
             ${{ secrets.DOCKERHUB_USERNAME }}/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04 \
             ${{ secrets.DOCKERHUB_USERNAME }}/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04-arm
           docker manifest push ${{ secrets.DOCKERHUB_USERNAME }}/mfc:${{ github.event.inputs.tag }}-gpu
+
+          docker manifest create ${{ secrets.DOCKERHUB_USERNAME }}/mfc:latest-gpu \
+            ${{ secrets.DOCKERHUB_USERNAME }}/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04-arm
+          docker manifest push ${{ secrets.DOCKERHUB_USERNAME }}/mfc:latest-gpu
