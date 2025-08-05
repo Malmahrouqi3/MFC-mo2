@@ -56,7 +56,9 @@ jobs:
 
       - name: Replace old SILO block in CMakeLists.txt
         run: |
-          sed -i 's/"cantera",/"cantera==3.0.1",/g' /mnt/share/toolchain/pyproject.toml
+          if [ -f /mnt/share/toolchain/pyproject.toml ]; then
+              sed -i 's/"cantera",/"cantera==3.0.1",/g' /mnt/share/toolchain/pyproject.toml
+          fi
 
           sed -i '/# SILO/,/^endif()/{
               r /dev/stdin
