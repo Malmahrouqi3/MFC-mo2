@@ -18,7 +18,7 @@ export TMPDIR=$currentdir
 if [ "$device" = "gpu" ]; then
     nsys profile -o report ./mfc.sh bench --mem 12 -j $(nproc) -o "$job_slug.yaml" -- -c phoenix-bench $device_opts -n $n_ranks
 else
-    ./mfc.sh bench --mem 1 -j $(nproc) -o "$job_slug.yaml" -- -c phoenix-bench $device_opts -n $n_ranks
+    perf record -g ./mfc.sh bench --mem 1 -j $(nproc) -o "$job_slug.yaml" -- -c phoenix-bench $device_opts -n $n_ranks
 fi
 
 sleep 10

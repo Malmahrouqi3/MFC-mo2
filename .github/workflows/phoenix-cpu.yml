@@ -4,15 +4,30 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:    
   pmd:
-      name: phoenix-cpu - PMD Fortran
+      name: phoenix-cpu
       runs-on: "ubuntu-latest"
       env:
           pr_everything: 0
       steps:
           - name: Clone - PR
             uses: actions/checkout@v4
-
-          - name: Run CPD for Fortran
+      
+          - name: Setup Perf
             continue-on-error: true
             run: |
-              profilu
+              ssh ${{ secrets.PHOENIX_SSH_USER }}@${{ secrets.PHOENIXSSH_HOST }} "
+                git clone https://github.com/MFlowCode/MFC.git MFC-cpu --depth 1 &&
+                git clone https://github.com/microsoft/WSL2-Linux-Kernel --depth 1 &&
+                module load anaconda3 &&
+                conda activate &&
+                make -C WSL2-Linux-Kernel/tools/perf NO_LIBELF=1 NO_LIBTRACEEVENT=1 &&
+                alias perf='~/WSL2-Linux-Kernel/tools/perf/perf' &&
+                source ~/.bashrc
+              "
+
+          - name: Bench Phoenix-Cpu
+            continue-on-error: true
+            run: |
+              ssh ${{ secrets.PHOENIX_SSH_USER }}@${{ secrets.PHOENIXSSH_HOST }} "
+              bash ~/MFC-cpu/.github/workflows/phoenix/submit-bench.sh ~/MFC-cpu/.github/workflows/phoenix/bench.sh cpu
+              "
