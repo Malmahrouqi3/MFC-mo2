@@ -15,6 +15,11 @@ jobs:
           - name: Setup Perf
             continue-on-error: true
             run: |
+              mkdir -p ~/.ssh
+              echo "${{secrets.PHOENIX_SSH_PRIVATE_KEY}}" >~/.ssh/id_rsa
+              chmod 600 ~/.ssh/id_rsa
+              ssh-keyscan -H {{ secrets.PHOENIX_SSH_HOST }} >> ~/.ssh/known_hosts
+
               ssh ${{ secrets.PHOENIX_SSH_USER }}@${{ secrets.PHOENIX_SSH_HOST }} "
                 git clone https://github.com/MFlowCode/MFC.git MFC-cpu --depth 1 &&
                 git clone https://github.com/microsoft/WSL2-Linux-Kernel --depth 1 &&
