@@ -15,7 +15,7 @@ jobs:
           - name: Setup Perf
             continue-on-error: true
             run: |
-              ssh ${{ secrets.PHOENIX_SSH_USER }}@${{ secrets.PHOENIXSSH_HOST }} "
+              ssh ${{ secrets.PHOENIX_SSH_USER }}@${{ secrets.PHOENIX_SSH_HOST }} "
                 git clone https://github.com/MFlowCode/MFC.git MFC-cpu --depth 1 &&
                 git clone https://github.com/microsoft/WSL2-Linux-Kernel --depth 1 &&
                 module load anaconda3 &&
