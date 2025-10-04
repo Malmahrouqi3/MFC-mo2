@@ -17,9 +17,6 @@ jobs:
       matrix:
         config:
             - { name: 'cpu', runner: 'ubuntu-22.04',     base_image: 'ubuntu:22.04' }
-            - { name: 'cpu', runner: 'ubuntu-22.04-arm', base_image: 'ubuntu:22.04' }
-            - { name: 'gpu', runner: 'ubuntu-22.04',     base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04' }
-            - { name: 'gpu', runner: 'ubuntu-22.04-arm', base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda12.3-ubuntu22.04' }
     runs-on: ${{ matrix.config.runner }}
     steps:
       - name: Login
@@ -99,6 +96,7 @@ jobs:
           builder: default
           context: /mnt/share
           file: /mnt/share/Dockerfile
+          platforms: linux/amd64,linux/arm64
           build-args: |
             BASE_IMAGE=${{ matrix.config.base_image }}
             TARGET=${{ matrix.config.name }}
@@ -110,34 +108,3 @@ jobs:
           tags: sbryngelson/mfc:${{ github.event.inputs.tag }}-${{ matrix.config.name }}-${{ matrix.config.runner}}
           push: true
 
-  manifests:
-    runs-on: ubuntu-latest
-    needs: Container
-    steps:
-      - name: Login
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - name: Create and push multi-arch manifests
-        run: |
-          docker manifest create sbryngelson/mfc:${{ github.event.inputs.tag }}-cpu \
-            sbryngelson/mfc:${{ github.event.inputs.tag }}-cpu-ubuntu-22.04 \
-            sbryngelson/mfc:${{ github.event.inputs.tag }}-cpu-ubuntu-22.04-arm
-          docker manifest push sbryngelson/mfc:${{ github.event.inputs.tag }}-cpu
-
-          docker manifest create sbryngelson/mfc:latest-cpu \
-            sbryngelson/mfc:${{ github.event.inputs.tag }}-cpu-ubuntu-22.04 \
-            sbryngelson/mfc:${{ github.event.inputs.tag }}-cpu-ubuntu-22.04-arm
-          docker manifest push sbryngelson/mfc:latest-cpu
-
-          docker manifest create sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu \
-            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04 \
-            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04-arm
-          docker manifest push sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu
-
-          docker manifest create sbryngelson/mfc:latest-gpu \
-            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04 \
-            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04-arm
-          docker manifest push sbryngelson/mfc:latest-gpu
