@@ -91,7 +91,7 @@ jobs:
           EOF
 
       - name: Build and push image
-        uses: docker/buildx-push-action@v5
+        uses: docker/build-push-action@v5
         with:
           builder: default
           context: /mnt/share
@@ -105,6 +105,6 @@ jobs:
             FC_COMPILER=${{ contains(matrix.config.name, 'gpu') && 'nvfortran' || 'gfortran' }}
             COMPILER_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin' || '/usr/bin' }}
             COMPILER_LD_LIBRARY_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib' || '/usr/lib' }}
-          tags: sbryngelson/mfc:${{ github.event.inputs.tag }}-${{ matrix.config.name }}-${{ matrix.config.runner}}
+          tags: mohdsaid497566/mfc:${{ github.event.inputs.tag }}-${{ matrix.config.name }}-${{ matrix.config.runner}}
           push: true
 
