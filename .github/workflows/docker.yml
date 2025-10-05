@@ -124,9 +124,9 @@ jobs:
       - name: Create and push multi-arch manifests
         run: |
           docker manifest create mohdsaid497566/mfc:${{ github.event.inputs.tag }}-cpu \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-cpu-ubuntu-22.04 \
+            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-cpu-ubuntu-22.04
           docker manifest push mohdsaid497566/mfc:${{ github.event.inputs.tag }}-cpu
 
           docker manifest create mohdsaid497566/mfc:latest-cpu \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-cpu-ubuntu-22.04 \
+            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-cpu-ubuntu-22.04
           docker manifest push mohdsaid497566/mfc:latest-cpu
