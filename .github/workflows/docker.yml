@@ -109,3 +109,24 @@ jobs:
             COMPILER_LD_LIBRARY_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib' || '/usr/lib' }}
           tags: mohdsaid497566/mfc:${{ github.event.inputs.tag }}-${{ matrix.config.name }}-${{ matrix.config.runner}}
           push: true
+
+
+  manifests:
+    runs-on: ubuntu-latest
+    needs: Container
+    steps:
+      - name: Login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Create and push multi-arch manifests
+        run: |
+          docker manifest create mohdsaid497566/mfc:${{ github.event.inputs.tag }}-cpu \
+            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-cpu-ubuntu-22.04 \
+          docker manifest push mohdsaid497566/mfc:${{ github.event.inputs.tag }}-cpu
+
+          docker manifest create mohdsaid497566/mfc:latest-cpu \
+            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-cpu-ubuntu-22.04 \
+          docker manifest push mohdsaid497566/mfc:latest-cpu
