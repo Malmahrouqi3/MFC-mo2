@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         config:
-            # - { name: 'cpu', runner: 'ubuntu-22.04',     base_image: 'ubuntu:22.04' }
+            - { name: 'cpu', runner: 'ubuntu-22.04',     base_image: 'ubuntu:22.04' }
             - { name: 'gpu', runner: 'ubuntu-22.04',     base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
             # - { name: 'gpu', runner: 'ubuntu-22.04-arm', base_image: 'ubuntu:22.04' }
 
