@@ -167,12 +167,15 @@ jobs:
           docker buildx imagetools create -t mohdsaid497566/mfc:latest-cpu \
             mohdsaid497566/mfc:${{ github.event.inputs.tag }}-cpu-ubuntu-22.04
 
-          docker manifest create mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04 \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04-arm
-          docker manifest push mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu
+          docker buildx imagetools create -t mohdsaid497566/mfc:latest-gpu \
+            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04
 
-          docker manifest create mohdsaid497566/mfc:latest-gpu \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04 \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04-arm
-          docker manifest push mohdsaid497566/mfc:latest-gpu
+          # docker manifest create mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu \
+          #   mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04 \
+          #   mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04-arm
+          # docker manifest push mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu
+
+          # docker manifest create mohdsaid497566/mfc:latest-gpu \
+          #   mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04 \
+          #   mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04-arm
+          # docker manifest push mohdsaid497566/mfc:latest-gpu
