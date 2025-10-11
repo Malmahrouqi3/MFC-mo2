@@ -39,9 +39,9 @@ ENV LD_LIBRARY_PATH="${COMPILER_LD_LIBRARY_PATH}:${LD_LIBRARY_PATH:-}"
 RUN echo "TARGET=$TARGET CC=$CC_COMPILER FC=$FC_COMPILER" && \
     cd /opt/MFC && \
     if [ "$TARGET" = "gpu" ]; then \
-      ./mfc.sh build -a --gpu -j $(nproc); \
+      ./mfc.sh build --gpu -j $(nproc); \
     else \
-      ./mfc.sh build -a -j $(nproc); \
+      ./mfc.sh build -j $(nproc); \
     fi
 
 WORKDIR /opt/MFC
