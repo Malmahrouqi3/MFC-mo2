@@ -165,7 +165,7 @@ jobs:
       - name: Create and push multi-arch manifests
         run: |
           docker buildx imagetools create -t sbryngelson/mfc:latest-cpu \
-            sbryngelson/mfc:${{ github.event.inputs.tag }}-cpu-ubuntu-22.04
+            sbryngelson/mfc:${{ github.event.inputs.tag }}-cpu
 
           docker manifest create sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu \
             sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04 \
