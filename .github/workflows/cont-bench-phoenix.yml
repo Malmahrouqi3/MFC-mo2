@@ -1,24 +1,26 @@
 name: Continuous Benchmarking Releases
 
 on:
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       tag:
-        description: 'tag to benchmark'
+        description: 'tag to CB'
         required: true
 
+concurrency:
+  group: CB-${{ github.event.inputs.tag || 'manual' }}
+  cancel-in-progress: false
+
 jobs:
-  Container:
+  container:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.runner }}
     strategy:
+      fail-fast: false
       matrix:
         config:
-            - { name: 'cpu', runner: 'ubuntu-22.04'}
-            - { name: 'gpu', runner: 'ubuntu-22.04'}
-    runs-on: ${{ matrix.config.runner }}
-    outputs:
-      tag: ${{ steps.tags.outputs.tag }}
+          - { name: 'cpu', runner: 'ubuntu-22.04'}
+          - { name: 'gpu', runner: 'ubuntu-22.04'}
     steps:
     - name: Checkout
       uses: actions/checkout@v4
