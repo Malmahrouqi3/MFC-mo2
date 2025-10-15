@@ -35,18 +35,18 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{secrets.PHOENIX_SSH_PRIVATE_KEY}}" >~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{secrets.PHOENIX_HOST}} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{secrets.PHOENIX_SSH_HOST}} >> ~/.ssh/known_hosts
 
-          ssh ${{secrets.PHOENIX_USER}}@${{secrets.PHOENIX_HOST}} "mkdir -p ~/MFC"
+          ssh ${{secrets.PHOENIX_SSH_USER}}@${{secrets.PHOENIX_SSH_HOST}} "mkdir -p ~/MFC"
 
     - name: Sync repo to Phoenix
       run: |
-        rsync -az --delete . ${{secrets.PHOENIX_USER}}@${{secrets.PHOENIX_HOST}}:~/MFC/
+        rsync -az --delete . ${{secrets.PHOENIX_SSH_USER}}@${{secrets.PHOENIX_SSH_HOST}}:~/MFC/
 
     - name: Submit SLURM job on Phoenix
       env:
         DEVICE: ${{ matrix.config.name }}
         TAG: ${{ env.TAG }}
       run: |
-        ssh ${{secrets.PHOENIX_USER}}@${{secrets.PHOENIX_HOST}} \
+        ssh ${{secrets.PHOENIX_SSH_USER}}@${{secrets.PHOENIX_SSH_HOST}} \
           "cd ~/MFC && bash .github/workflows/phoenix/submit-bench.sh .github/workflows/phoenix/bench.sh ${DEVICE} ${TAG}"
