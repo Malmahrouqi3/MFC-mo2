@@ -1,0 +1,50 @@
+name: Continuous Benchmarking Releases
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'tag to benchmark'
+        required: true
+
+jobs:
+  Container:
+    strategy:
+      matrix:
+        config:
+            - { name: 'cpu', runner: 'ubuntu-22.04'}
+            - { name: 'gpu', runner: 'ubuntu-22.04'}
+    runs-on: ${{ matrix.config.runner }}
+    outputs:
+      tag: ${{ steps.tags.outputs.tag }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Connect to Phoenix via SSH
+      id: tags
+      run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "TAG=$TAG" >> $GITHUB_ENV
+
+          mkdir -p ~/.ssh
+          echo "${{secrets.PHOENIX_SSH_PRIVATE_KEY}}" >~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{secrets.PHOENIX_HOST}} >> ~/.ssh/known_hosts
+
+          ssh ${{secrets.PHOENIX_USER}}@${{secrets.PHOENIX_HOST}} "mkdir -p ~/MFC"
+
+    - name: Sync repo to Phoenix
+      run: |
+        rsync -az --delete . ${{secrets.PHOENIX_USER}}@${{secrets.PHOENIX_HOST}}:~/MFC/
+
+    - name: Submit SLURM job on Phoenix
+      env:
+        DEVICE: ${{ matrix.config.name }}
+        TAG: ${{ env.TAG }}
+      run: |
+        ssh ${{secrets.PHOENIX_USER}}@${{secrets.PHOENIX_HOST}} \
+          "cd ~/MFC && bash .github/workflows/phoenix/submit-bench.sh .github/workflows/phoenix/bench.sh ${DEVICE} ${TAG}"

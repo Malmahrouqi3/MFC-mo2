@@ -8,17 +8,20 @@ if [ "$job_device" = "gpu" ]; then
     device_opts="--gpu -g $gpu_ids"
 fi
 
-tmpbuild=/storage/scratch1/6/sbryngelson3/mytmp_build
+tmpbuild=/scratch
 currentdir=$tmpbuild/run-$(( RANDOM % 900 ))
 mkdir -p $tmpbuild
 mkdir -p $currentdir
 
-export TMPDIR=$currentdir
+mkdir -p "$currentdir"
+export TMPDIR="$currentdir"
+
+out="/scratch/$job_slug-$job_device.yaml"
 
 if [ "$job_device" = "gpu" ]; then
-    ./mfc.sh bench --mem 12 -j $(nproc) -o "$job_slug.yaml" -- -c phoenix-bench $device_opts -n $n_ranks
+    ./mfc.sh bench --mem 12 -j $(nproc) -o "$job_slug-$device_opts.yaml" -- -c phoenix-bench $device_opts -n $n_ranks
 else
-    ./mfc.sh bench --mem 1 -j $(nproc) -o "$job_slug.yaml" -- -c phoenix-bench $device_opts -n $n_ranks
+    ./mfc.sh bench --mem 1 -j $(nproc) -o "$job_slug-$device_opts.yaml" -- -c phoenix-bench $device_opts -n $n_ranks
 fi
 
 sleep 10

@@ -34,18 +34,22 @@ else
     exit 1
 fi
 
-job_slug="`basename "$1" | sed 's/\.sh$//' | sed 's/[^a-zA-Z0-9]/-/g'`-$2"
+if [ ! -z "$3" ]; then
+    job_slug="$3"
+else
+    job_slug="`basename "$1" | sed 's/\.sh$//' | sed 's/[^a-zA-Z0-9]/-/g'`-$2"
+fi
 
 sbatch <<EOT
 #!/bin/bash
-#SBATCH -Jshb-$job_slug            # Job name
-#SBATCH --account=gts-sbryngelson3 # charge account
-#SBATCH -N1                        # Number of nodes required
+#SBATCH -Jshb-$job_slug-$job_device # Job name
+#SBATCH --account=gts-sbryngelson3  # charge account
+#SBATCH -N1                         # Number of nodes required
 $sbatch_device_opts
-#SBATCH -t 02:00:00                # Duration of the job (Ex: 15 mins)
-#SBATCH -q embers                  # QOS Name
-#SBATCH -o$job_slug.out            # Combined output and error messages file
-#SBATCH -W                         # Do not exit until the submitted job terminates.
+#SBATCH -t 03:00:00                 # Duration of the job (Ex: 15 mins)
+#SBATCH -q embers                   # QOS Name
+#SBATCH -o$job_slug.out             # Combined output and error messages file
+#SBATCH -W                          # Do not exit until the submitted job terminates.
 
 set -e
 set -x
@@ -56,9 +60,21 @@ echo "Running in $(pwd):"
 job_slug="$job_slug"
 job_device="$2"
 
-. ./mfc.sh load -c p -m $2
+SCRATCH_DIR=/storage/home/hcoda1/6/malmahrouqi3/scratch/mfc_tmp
+mkdir -p "\$SCRATCH_DIR"
 
-$sbatch_script_contents
+module load apptainer
+
+CONTAINER="mfc:$job_slug-$job_device.sif"
+
+NV_FLAG=""
+[ "\$job_device" = "gpu" ] && NV_FLAG="--nv"
+
+apptainer exec $NV_FLAG --fakeroot --writable-tmpfs \
+  --bind "\$SCRATCH_DIR":/scratch \
+  --env job_slug="\$job_slug" \
+  --env job_device="\$job_device" \
+  "\$CONTAINER" \
+  bash -c "cd /opt/MFC && $sbatch_script_contents"
 
 EOT
-
