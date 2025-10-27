@@ -46,4 +46,3 @@ jobs:
           gh-repository: 'github.com/Malmahrouqi3/malmahrouqi3.github.io'
           gh-pages-branch: 'main'
           benchmark-data-dir-path: 'docs/documentation/bench'
-          ref: ${{ github.event.inputs.tag || github.ref_name }}
