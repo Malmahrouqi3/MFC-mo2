@@ -1,6 +1,13 @@
 name: Reporting Benchmark Results
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'tag to bench'
+        required: true
 
 permissions:
   contents: write
@@ -24,15 +31,15 @@ jobs:
           apt-get update -y
           apt-get install -y cmake gcc g++ python3 python3-dev hdf5-tools \
                     libfftw3-dev libhdf5-dev openmpi-bin libopenmpi-dev
-          # export TOKEN=$(gh auth token)
-          # wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          # chmod +x /usr/local/bin/yq
-          # yq --version
+
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "TAG=$TAG" >> $GITHUB_ENV
 
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1
         with:
-          name: C++ Benchmark
+          name: Continuous Benchmarking
           tool: 'googlecpp'
           output-file-path: pr/report.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -41,3 +48,6 @@ jobs:
           comment-on-alert: true
           fail-on-alert: true
           gh-repository: 'github.com/Malmahrouqi3/malmahrouqi3.github.io'
+          gh-pages-branch: 'main'
+          benchmark-data-dir-path: 'docs/documentation/bench'
+          ref: ${{ github.event.inputs.tag || github.ref_name }}
