@@ -45,4 +45,4 @@ jobs:
           fail-on-alert: true
           gh-repository: 'github.com/Malmahrouqi3/malmahrouqi3.github.io'
           gh-pages-branch: 'main'
-          benchmark-data-dir-path: 'docs/documentation/bench'
+          benchmark-data-dir-path: 'documentation/bench'
