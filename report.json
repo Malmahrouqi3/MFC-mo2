@@ -4,7 +4,7 @@
 "num_cpus": 40,
 "mhz_per_cpu": 2801,
 "cpu_scaling_enabled": false,
-"build_type": "debug"
+"build_type": "release"
 },
 "benchmarks": [
 {
