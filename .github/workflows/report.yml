@@ -35,7 +35,7 @@ jobs:
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1
         with:
-          name: Continuous Benchmarking
+          name: Continuous Benchmarking (CPU)
           tool: 'googlecpp'
           output-file-path: pr/report.json
           github-token: ${{ secrets.TOKEN }}
@@ -46,3 +46,20 @@ jobs:
           gh-repository: 'github.com/Malmahrouqi3/malmahrouqi3.github.io'
           gh-pages-branch: 'main'
           benchmark-data-dir-path: 'documentation/bench'
+
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: Continuous Benchmarking (GPU)
+          tool: 'googlecpp'
+          output-file-path: pr/report.json
+          github-token: ${{ secrets.TOKEN }}
+          auto-push: true
+          alert-threshold: '200%'
+          comment-on-alert: true
+          fail-on-alert: true
+          gh-repository: 'github.com/Malmahrouqi3/malmahrouqi3.github.io'
+          gh-pages-branch: 'main'
+          benchmark-data-dir-path: 'documentation/bench'
+
+          
