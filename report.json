@@ -11,7 +11,8 @@
 "name": "5eq_rk3_weno3_hllc",
 "iterations": 94877,
 "real_time": 29275,
-"cpu_time": 29836,
+"time_unit": "s",
+"threads": 1,
 "bytes_per_second": 134066,
 "items_per_second": 33516
 },
@@ -19,7 +20,8 @@
 "name": "hypo_hll",
 "iterations": 21609,
 "real_time": 32317,
-"cpu_time": 32429,
+"time_unit": "s",
+"threads": 1,
 "bytes_per_second": 986770,
 "items_per_second": 246693
 },
@@ -27,7 +29,8 @@
 "name": "ibm",
 "iterations": 21609,
 "real_time": 32317,
-"cpu_time": 32429,
+"time_unit": "s",
+"threads": 1,
 "bytes_per_second": 986770,
 "items_per_second": 246693
 },
@@ -35,7 +38,8 @@
 "name": "igr",
 "iterations": 21609,
 "real_time": 32317,
-"cpu_time": 32429,
+"time_unit": "s",
+"threads": 1,
 "bytes_per_second": 986770,
 "items_per_second": 246693
 },
@@ -43,7 +47,8 @@
 "name": "viscous_weno5_sgb_acoustic",
 "iterations": 21393,
 "real_time": 32724,
-"cpu_time": 33355,
+"time_unit": "s",
+"threads": 1,
 "bytes_per_second": 1199226,
 "items_per_second": 299807
 }
