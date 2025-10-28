@@ -46,6 +46,12 @@ jobs:
           gh-repository: 'github.com/Malmahrouqi3/malmahrouqi3.github.io'
           gh-pages-branch: 'main'
           benchmark-data-dir-path: 'documentation/bench'
+          
+      - name: Clean benchmark data repository directory
+        run: |
+          if [ -d "./benchmark-data-repository" ]; then
+            rm -rf ./benchmark-data-repository
+          fi
 
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1
