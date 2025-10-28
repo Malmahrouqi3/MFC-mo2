@@ -13,7 +13,7 @@
 "real_time": 29275,
 "cpu_time": 29275,
 "time_unit": "s",
-"threads": 1,
+"threads": 1
 },
 {
 "name": "hypo_hll",
@@ -21,7 +21,7 @@
 "real_time": 32317,
 "cpu_time": 29275,
 "time_unit": "s",
-"threads": 1,
+"threads": 1
 },
 {
 "name": "ibm",
@@ -29,7 +29,7 @@
 "real_time": 32317,
 "cpu_time": 29275,
 "time_unit": "s",
-"threads": 1,
+"threads": 1
 },
 {
 "name": "igr",
@@ -37,7 +37,7 @@
 "real_time": 32317,
 "cpu_time": 29275,
 "time_unit": "s",
-"threads": 1,
+"threads": 1
 },
 {
 "name": "viscous_weno5_sgb_acoustic",
@@ -45,7 +45,7 @@
 "real_time": 32724,
 "cpu_time": 29275,
 "time_unit": "s",
-"threads": 1,
+"threads": 1
 }
 ]
 }
