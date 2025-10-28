@@ -1,16 +1,14 @@
 {
 "context": {
 "date": "2015/03/17-20:40:25",
-"num_cpus": 40,
-"mhz_per_cpu": 2801,
-"cpu_scaling_enabled": false,
-"build_type": "debug"
+"num_cores": 40,
 },
 "benchmarks": [
 {
 "name": "5eq_rk3_weno3_hllc",
 "iterations": 94877,
 "real_time": 29275,
+"cpu_time": 29275,
 "time_unit": "s",
 "threads": 1,
 },
@@ -18,6 +16,7 @@
 "name": "hypo_hll",
 "iterations": 21609,
 "real_time": 32317,
+"cpu_time": 29275,
 "time_unit": "s",
 "threads": 1,
 },
@@ -25,6 +24,7 @@
 "name": "ibm",
 "iterations": 21609,
 "real_time": 32317,
+"cpu_time": 29275,
 "time_unit": "s",
 "threads": 1,
 },
@@ -32,6 +32,7 @@
 "name": "igr",
 "iterations": 21609,
 "real_time": 32317,
+"cpu_time": 29275,
 "time_unit": "s",
 "threads": 1,
 },
@@ -39,6 +40,7 @@
 "name": "viscous_weno5_sgb_acoustic",
 "iterations": 21393,
 "real_time": 32724,
+"cpu_time": 29275,
 "time_unit": "s",
 "threads": 1,
 }
