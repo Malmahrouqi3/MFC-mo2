@@ -70,6 +70,7 @@ jobs:
         git clone "https://Malmahrouqi3:${{ secrets.TOKEN }}@github.com/Malmahrouqi3/malmahrouqi3.github.io" ../www
         rm -rf ../www/*
         mv build/install/docs/mfc/* ../www/
+        cp build/install/docs/mfc/documentation/{tabs.css,navtree.css,jquery.js,dynsections.js,resize.js,navtreedata.js,navtree.js,doxygen.css,doxygen-awesome.css,doxygen-awesome-sidebar-only.css,icon.ico} ../www/documentation/bench
         git -C ../www add -A
         git -C ../www commit -m "Docs @ ${GITHUB_SHA::7}" || true
         git -C ../www push
