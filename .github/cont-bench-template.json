@@ -1,0 +1,51 @@
+{
+  "context": {
+    "date": "{{ date_time | default('N/A') }}",
+    "num_cpus": "{{ number_of_cpus | default(1) }}",
+    "mhz_per_cpu": "{{ cpu_frequency_mhz | default(0) }}",
+    "cpu_scaling_enabled": "{{ is_cpu_scaling_enabled | default(false) }}",
+    "build_type": "{{ build_type | default('release') }}"
+  },
+  "benchmarks": [
+    {
+      "name": "{{benchmark_name_1 | default('5eq_rk3_weno3_hllc') }}",
+      "iterations": "{{iterations_1 | default(0) }}",
+      "real_time": "{{real_time_1 | default(0) }}",
+      "cpu_time": "{{cpu_time_1 | default(0) }}",
+      "time_unit": "{{time_unit_1 | default('s') }}",
+      "threads": "{{threads | default(1) }}"
+    },
+    {
+      "name": "{{benchmark_name_2 | default('hypo_hll') }}",
+      "iterations": "{{iterations_2 | default(0) }}",
+      "real_time": "{{real_time_2 | default(0) }}",
+      "cpu_time": "{{cpu_time_2 | default(0) }}",
+      "time_unit": "{{time_unit_2 | default('s') }}",
+      "threads": "{{threads | default(1) }}"
+    },
+    {
+      "name": "{{benchmark_name_3 | default('ibm') }}",
+      "iterations": "{{iterations_3 | default(0) }}",
+      "real_time": "{{real_time_3 | default(0) }}",
+      "cpu_time": "{{cpu_time_3 | default(0) }}",
+      "time_unit": "{{time_unit_3 | default('s') }}",
+      "threads": "{{threads | default(1) }}"
+    },
+    {
+      "name": "{{benchmark_name_4 | default('igr') }}",
+      "iterations": "{{iterations_4 | default(0) }}",
+      "real_time": "{{real_time_4 | default(0) }}",
+      "cpu_time": "{{cpu_time_4 | default(0) }}",
+      "time_unit": "{{time_unit_4 | default('s') }}",
+      "threads": "{{threads | default(1) }}"
+    },
+    {
+      "name": "{{benchmark_name_5 | default('viscous_weno5_sgb_acoustic') }}",
+      "iterations": "{{iterations_5 | default(0) }}",
+      "real_time": "{{real_time_5 | default(0) }}",
+      "cpu_time": "{{cpu_time_5 | default(0) }}",
+      "time_unit": "{{time_unit_5 | default('s') }}",
+      "threads": "{{threads | default(1) }}"
+    }
+  ]
+}
