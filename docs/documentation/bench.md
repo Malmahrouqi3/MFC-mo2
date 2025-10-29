@@ -1,3 +1,4 @@
+\htmlonly
 <!DOCTYPE html>
 <html>
     <header id="header">
@@ -192,3 +193,4 @@
     </script>
   </body>
 </html>
+\endhtmlonly
