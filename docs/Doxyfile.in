@@ -1123,6 +1123,9 @@ HTML_FILE_EXTENSION    = .html
 # and then modify the file new_header.html. See also section "Doxygen usage"
 # for information on how to generate the default header that doxygen normally
 # uses.
+
+GENERATE_TREEVIEW = YES
+
 # Note: The header is subject to change so you typically have to regenerate the
 # default header when upgrading to a newer version of doxygen. For a description
 # of the possible markers and block names see the documentation.

@@ -1,3 +1,8 @@
+/**
+ * @page expectedPerformance Expected Performance
+ * @ingroup performance
+ */
+
 # Performance
 
 MFC has been benchmarked on several CPUs and GPU devices.

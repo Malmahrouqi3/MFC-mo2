@@ -1,3 +1,8 @@
+/**
+ * @page continuousBenchmarks Continuous Benchmarks
+ * @ingroup performance
+ */
+
 # Continuous Benchmarks
 
 \htmlonly
