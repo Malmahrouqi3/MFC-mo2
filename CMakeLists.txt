@@ -612,20 +612,6 @@ if (MFC_DOCUMENTATION)
 
     file(GLOB common_DOCs CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/docs/*")
 
-    # Copy bench/data.js to build directory
-    add_custom_command(
-        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/documentation/bench/data.js"
-        COMMAND ${CMAKE_COMMAND} -E copy
-                "${CMAKE_CURRENT_SOURCE_DIR}/docs/documentation/bench/data.js"
-                "${CMAKE_CURRENT_BINARY_DIR}/documentation/bench/data.js"
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/docs/documentation/bench/data.js"
-        COMMENT "Copying data.js to build directory"
-        VERBATIM
-    )
-
-    add_custom_target(bench_data_copy ALL 
-        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/documentation/bench/data.js")
-
     # GEN_DOCS: Given a target name (herein <target>), this macro sets up a
     # target, <target>_docs, that generates documentation for <target> using
     # Doxygen. It is then added as a dependency of the documentation target.
@@ -636,9 +622,7 @@ if (MFC_DOCUMENTATION)
 
     macro(GEN_DOCS target name)
         set(DOXYGEN_PROJECT_NAME     "\"${name}\"")
-        set(DOXYGEN_INPUT            "\"${CMAKE_CURRENT_SOURCE_DIR}/docs/${target}\""
-                                     "\"${CMAKE_CURRENT_SOURCE_DIR}/docs/documentation/bench\"")
-
+        set(DOXYGEN_INPUT            "\"${CMAKE_CURRENT_SOURCE_DIR}/docs/${target}\"")
 
         foreach (f90 ${${target}_SRCs})
             set(DOXYGEN_INPUT "${DOXYGEN_INPUT} \"${f90}\"")
@@ -663,10 +647,7 @@ if (MFC_DOCUMENTATION)
             set(opt_example_dependency "${CMAKE_CURRENT_SOURCE_DIR}/docs/documentation/examples.md")
         endif()
 
-        file(GLOB_RECURSE ${target}_DOCs CONFIGURE_DEPENDS 
-        "${CMAKE_CURRENT_SOURCE_DIR}/docs/${target}/*"
-        "${CMAKE_CURRENT_SOURCE_DIR}/docs/documentation/bench/*")
-
+        file(GLOB_RECURSE ${target}_DOCs CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/docs/${target}/*")
         list(APPEND ${target}_DOCs "${common_DOCs}")
 
         add_custom_command(
@@ -684,41 +665,8 @@ if (MFC_DOCUMENTATION)
             DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${target}/html/index.html"
         )
 
-        if (${target} STREQUAL documentation)
-            add_dependencies("${target}_doxygen" bench_data_copy)
-            
-            # After Doxygen completes, copy bench files to the correct location
-            add_custom_command(TARGET "${target}_doxygen" POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E make_directory
-                        "${CMAKE_CURRENT_BINARY_DIR}/${target}/bench"
-                COMMAND ${CMAKE_COMMAND} -E copy
-                        "${CMAKE_CURRENT_BINARY_DIR}/documentation/bench/data.js"
-                        "${CMAKE_CURRENT_BINARY_DIR}/${target}/bench/data.js"
-                # Doxygen generates md_bench.html in the main html/ directory
-                # Copy it to bench/index.html
-                COMMAND ${CMAKE_COMMAND} -E copy
-                        "${CMAKE_CURRENT_BINARY_DIR}/${target}/md_bench.html"
-                        "${CMAKE_CURRENT_BINARY_DIR}/${target}/bench/index.html"
-                COMMENT "Copying bench files into documentation output"
-                VERBATIM
-            )
-        endif()
-
-        # Install documentation
-        if (${target} STREQUAL documentation)
-            # Install main HTML documentation, excluding md_bench.html (handled separately)
-            install(DIRECTORY   "${CMAKE_CURRENT_BINARY_DIR}/${target}/"
-                    DESTINATION "docs/mfc/documentation"
-                    PATTERN "bench" EXCLUDE
-                    PATTERN "md_bench.html" EXCLUDE)
-            
-            # Install bench directory separately
-            install(DIRECTORY   "${CMAKE_CURRENT_BINARY_DIR}/${target}/bench"
-                    DESTINATION "docs/mfc/documentation")
-        else()
-            install(DIRECTORY   "${CMAKE_CURRENT_BINARY_DIR}/${target}"
-                    DESTINATION "docs/mfc")
-        endif()
+        install(DIRECTORY   "${CMAKE_CURRENT_BINARY_DIR}/${target}"
+                DESTINATION "docs/mfc")
 
         add_dependencies("${target}_doxygen" doxygen-awesome-css)
         add_dependencies(documentation "${target}_doxygen")
