@@ -1,7 +1,7 @@
 /**
  * @page expectedPerformance Expected Performance
- * @ingroup performance
  */
+
 
 # Performance
 
