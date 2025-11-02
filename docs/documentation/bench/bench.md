@@ -1,7 +1,3 @@
-/**
- * @page continuousBenchmarks Continuous Benchmarks
- */
-
 # Continuous Benchmarks
 
 \htmlonly
