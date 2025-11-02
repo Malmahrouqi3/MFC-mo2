@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doxygenlayout version="1.0">
+  <nav>
+    <tab type="user" title="Performance" url="performance.html">
+      <tab type="user" title="Bench" url="documentation/bench/bench.html" />
+    </tab>
+  </nav>
+</doxygenlayout>
