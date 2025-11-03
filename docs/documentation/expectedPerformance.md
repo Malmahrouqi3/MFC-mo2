@@ -1,4 +1,5 @@
-# Performance
+/documentation/expectedPerformance.md -->
+# Expected Performance {#expectedPerformance}
 
 MFC has been benchmarked on several CPUs and GPU devices.
 This page is a summary of these results.

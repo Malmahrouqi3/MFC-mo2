@@ -1,4 +1,4 @@
-\page bench Continuous Benchmarking
+# Continuous Benchmarking
 
 \htmlonly
 <base href="../">
