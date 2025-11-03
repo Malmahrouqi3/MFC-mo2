@@ -5,7 +5,7 @@
     <tab type="pages" visible="yes" title="" intro=""/>
     <tab type="usergroup" url="^" title="Performance" visible="yes">
       <tab type="user" url="@ref expectedPerformance" title="Expected Performance"/>
-      <tab type="user" url="bench/index.html" title="Continuous Benchmarking"/>
+      <tab type="user" url="@ref ContinuousBenchmarking" title="Continuous Benchmarking"/>
     </tab>
     <tab type="modules" visible="yes" title="" intro=""/>
     <tab type="namespaces" visible="yes" title="">

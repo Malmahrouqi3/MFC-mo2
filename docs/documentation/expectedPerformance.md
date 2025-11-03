@@ -1,4 +1,3 @@
-/documentation/expectedPerformance.md -->
 # Expected Performance {#expectedPerformance}
 
 MFC has been benchmarked on several CPUs and GPU devices.
