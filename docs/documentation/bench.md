@@ -1,6 +1,7 @@
-# Continuous Benchmarks
+\page bench Continuous Benchmarking
 
 \htmlonly
+<base href="../">
   <header id="header">
     <div class="header-item">
       <strong class="header-label">Last Update:</strong>

@@ -1,7 +1,8 @@
 <doxygenlayout version="1.0">
-  <nav>
-    <tab type="user" title="Performance" url="documentation/md_expectedPerformance.html">
-      <tab type="user" title="Bench" url="documentation/bench/index.html" />
+  <navindex>
+    <tab type="usergroup" title="Performance">
+      <tab type="user" title="Expected Performance" url="@ref expectedPerformance"/>
+      <tab type="user" title="Continuous Benchmarking" url="bench/index.html"/>
     </tab>
-  </nav>
+  </navindex>
 </doxygenlayout>
