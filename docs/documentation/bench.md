@@ -1,7 +1,5 @@
 \page ContinuousBenchmarking Continuous Benchmarking
 
-# Continuous Benchmarking {#ContinuousBenchmarking}
-
 \htmlonly
   <header id="header">
     <div class="header-item">
