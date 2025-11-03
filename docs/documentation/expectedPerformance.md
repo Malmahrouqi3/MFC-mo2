@@ -1,4 +1,12 @@
-# Expected Performance {#expectedPerformance}
+# Performance {#Performance}
+
+\subpage expectedPerformance "Expected Performance"
+
+\subpage ContinuousBenchmarking "Continuous Benchmarking"
+
+---
+
+\page expectedPerformance Expected Performance
 
 MFC has been benchmarked on several CPUs and GPU devices.
 This page is a summary of these results.

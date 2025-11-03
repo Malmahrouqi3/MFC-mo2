@@ -1,3 +1,5 @@
+\page ContinuousBenchmarking Continuous Benchmarking
+
 # Continuous Benchmarking {#ContinuousBenchmarking}
 
 \htmlonly
