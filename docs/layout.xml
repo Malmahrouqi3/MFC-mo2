@@ -1,8 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <doxygenlayout version="1.0">
   <navindex>
-    <tab type="usergroup" title="Performance">
-      <tab type="user" title="Expected Performance" url="@ref expectedPerformance"/>
-      <tab type="user" title="Continuous Benchmarking" url="bench/index.html"/>
+    <tab type="mainpage" visible="yes" title=""/>
+    <tab type="pages" visible="yes" title="" intro=""/>
+    <tab type="usergroup" title="Performance" visible="yes">
+      <tab type="user" url="@ref expectedPerformance" title="Expected Performance"/>
+      <tab type="user" url="@ref bench" title="Continuous Benchmarking"/>
+    </tab>
+    <tab type="modules" visible="yes" title="" intro=""/>
+    <tab type="namespaces" visible="yes" title="">
+      <tab type="namespacelist" visible="yes" title="" intro=""/>
+      <tab type="namespacemembers" visible="yes" title="" intro=""/>
+    </tab>
+    <tab type="files" visible="yes" title="">
+      <tab type="filelist" visible="yes" title="" intro=""/>
+      <tab type="globals" visible="yes" title="" intro=""/>
     </tab>
   </navindex>
 </doxygenlayout>

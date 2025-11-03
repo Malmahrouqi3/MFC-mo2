@@ -689,17 +689,16 @@ if (MFC_DOCUMENTATION)
             
             # After Doxygen completes, copy bench files to the correct location
             add_custom_command(TARGET "${target}_doxygen" POST_BUILD
+                # Create bench directory in HTML output
                 COMMAND ${CMAKE_COMMAND} -E make_directory
-                        "${CMAKE_CURRENT_BINARY_DIR}/${target}/bench"
+                        "${CMAKE_CURRENT_BINARY_DIR}/${target}/html/bench"
+                
+                # Copy data.js to bench directory
                 COMMAND ${CMAKE_COMMAND} -E copy
                         "${CMAKE_CURRENT_BINARY_DIR}/documentation/bench/data.js"
-                        "${CMAKE_CURRENT_BINARY_DIR}/${target}/bench/data.js"
-                # Doxygen generates md_bench.html in the main html/ directory
-                # Copy it to bench/index.html
-                COMMAND ${CMAKE_COMMAND} -E copy
-                        "${CMAKE_CURRENT_BINARY_DIR}/${target}/md_bench.html"
-                        "${CMAKE_CURRENT_BINARY_DIR}/${target}/bench/index.html"
-                COMMENT "Copying bench files into documentation output"
+                        "${CMAKE_CURRENT_BINARY_DIR}/${target}/html/bench/data.js"
+                
+                COMMENT "Copying bench data.js to HTML output"
                 VERBATIM
             )
         endif()
