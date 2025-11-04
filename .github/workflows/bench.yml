@@ -63,7 +63,9 @@ jobs:
             build_script: "bash .github/workflows/frontier/build.sh gpu acc bench"
     runs-on:
       group: ${{ matrix.group }}
-      labels: ${{ matrix.labels }}
+      labels: 
+        - self-hosted
+        - ${{ matrix.labels }}
     timeout-minutes: 1400
     env:
       ACTIONS_RUNNER_FORCE_ACTIONS_NODE_VERSION: node16
