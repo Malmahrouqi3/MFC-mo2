@@ -16,7 +16,7 @@ if [ "$job_device" = "gpu" ]; then
     device_opts+=" -g $gpu_ids"
 fi
 
-tmpbuild=/storage/scratch1/6/sbryngelson3/mytmp_build
+tmpbuild=/storage/home/hcoda1/6/malmahrouqi3/scratch/mfc_tmp
 currentdir=$tmpbuild/run-$(( RANDOM % 900 ))
 mkdir -p $tmpbuild
 mkdir -p $currentdir
