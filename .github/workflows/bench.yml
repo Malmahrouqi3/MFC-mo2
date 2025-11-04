@@ -65,6 +65,7 @@ jobs:
       group: ${{ matrix.group }}
       labels: 
         - self-hosted
+        - fork
         - ${{ matrix.labels }}
     timeout-minutes: 1400
     env:
