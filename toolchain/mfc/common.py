@@ -1,4 +1,4 @@
-import os, yaml, typing, shutil, subprocess
+import os, yaml, json, typing, shutil, subprocess
 
 from os.path import join, abspath, normpath, dirname, realpath
 
@@ -77,6 +77,12 @@ def file_dump_yaml(filepath: str, data) -> None:
     except (IOError, yaml.YAMLError) as exc:
         raise MFCException(f'Failed to dump YAML to "{filepath}": {exc}.') from exc
 
+def file_load_json(filepath: str):
+    try:
+        with open(filepath, "r") as f:
+            return json.load(f)
+    except (IOError, json.JSONDecodeError) as exc:
+        raise MFCException(f'Failed to load JSON from "{filepath}": {exc}') from exc
 
 def delete_file(filepath: str) -> None:
     if os.path.exists(filepath):
