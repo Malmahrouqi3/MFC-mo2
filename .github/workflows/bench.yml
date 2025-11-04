@@ -31,7 +31,7 @@ jobs:
         include:
           - cluster: phoenix
             name: Georgia Tech | Phoenix (NVHPC)
-            group: Default
+            group: default
             labels: gt
             flag: p
             device: cpu
@@ -39,7 +39,7 @@ jobs:
             build_script: ""
           - cluster: phoenix
             name: Georgia Tech | Phoenix (NVHPC)
-            group: Default
+            group: default
             labels: gt
             flag: p
             device: gpu
@@ -47,7 +47,7 @@ jobs:
             build_script: ""
           - cluster: phoenix
             name: Georgia Tech | Phoenix (NVHPC)
-            group: Default
+            group: default
             labels: gt
             flag: p
             device: gpu
@@ -55,7 +55,7 @@ jobs:
             build_script: ""
           - cluster: frontier
             name: Oak Ridge | Frontier (CCE)
-            group: Default
+            group: default
             labels: frontier
             flag: f
             device: gpu
