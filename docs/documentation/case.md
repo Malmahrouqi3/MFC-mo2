@@ -78,24 +78,24 @@ digraph MFC_features
 
     node [shape=plaintext, fontsize="10", fontname="Open Sans"]
                            
-    Bootstrap      [label= "Bootstrap"   shape= "box"        color="black" penwidth=2   URL="\ref alib_mod_bs"           ];
+    Bootstrap      [label= "Bootstrap"   shape= "box"        color="black" penwidth=2];
 
     //--- ALib Camps ---
-//  Application    [label= Application     shape= "component" style="bold" color="chocolate"   URL="\ref alib_mod_app"          ];
-    ALox           [label= ALox            shape= "component" style="bold" color="chocolate"   URL="\ref alib_mod_alox"         ];
-    Camp           [label= Camp            shape= "component" style="bold" color="chocolate4"  URL="\ref alib_mod_camp"         ];
-    CLI            [label= CLI             shape= "component" style="bold" color="chocolate"   URL="\ref alib_mod_cli"          ];
-    Expressions    [label= Expressions     shape= "component" style="bold" color="chocolate"   URL="\ref alib_mod_expressions"  ];
-    Files          [label= Files           shape= "component" style="bold" color="chocolate"   URL="\ref alib_mod_files"        ];
+//  Application    [label= Application     shape= "component" style="bold" color="chocolate"];
+    ALox           [label= ALox            shape= "component" style="bold" color="chocolate"];
+    Camp           [label= Camp            shape= "component" style="bold" color="chocolate4"];
+    CLI            [label= CLI             shape= "component" style="bold" color="chocolate"];
+    Expressions    [label= Expressions     shape= "component" style="bold" color="chocolate"];
+    Files          [label= Files           shape= "component" style="bold" color="chocolate"];
 
     Bootstrap      -> { ALox CLI Expressions Files }          [ color="gray69"  style=dotted, penwidth=2 ];
 
     //--- Below Camp ---
-    Format           [label= Format       shape= "box" color="dodgerblue4"  URL="\ref alib_mod_format"     ];
-    Exceptions       [label= Exceptions   shape= "box" color="dodgerblue4"  URL="\ref alib_mod_exceptions" ];
-    Resources        [label= Resources    shape= "box" color="dodgerblue4"  URL="\ref alib_mod_resources"  ];
-    System           [label= System       shape= "box" color="dodgerblue4"  URL="\ref alib_mod_system"     ];
-    Variables        [label= Variables    shape= "box" color="dodgerblue4"  URL="\ref alib_mod_variables"  ];
+    Format           [label= Format       shape= "box" color="dodgerblue4"  ];
+    Exceptions       [label= Exceptions   shape= "box" color="dodgerblue4"  ];
+    Resources        [label= Resources    shape= "box" color="dodgerblue4"  ];
+    System           [label= System       shape= "box" color="dodgerblue4"  ];
+    Variables        [label= Variables    shape= "box" color="dodgerblue4"  ];
 
 
   //Application     -> { CLI ALox                      }  [ color="midnightblue" ];
@@ -114,15 +114,15 @@ digraph MFC_features
     Resources       -> { Strings Containers Monomem      }  [ color="gray15" ];
 
                             
-    ThreadModel    [label= ThreadModel           shape= "box"        color="dodgerblue4"     style="bold"  URL="\ref alib_mod_threads"      ];
-    BitBuffer      [label= BitBuffer             shape= "box"        color="dodgerblue4"     style="bold"  URL="\ref alib_mod_bitbuffer"    ];
+    ThreadModel    [label= ThreadModel           shape= "box"        color="dodgerblue4"     style="bold" ];
+    BitBuffer      [label= BitBuffer             shape= "box"        color="dodgerblue4"     style="bold"  ];
                                                  
-    Boxing         [label= Boxing                shape= "box"        color="dodgerblue4"   URL="\ref alib_mod_boxing"       ];
-    Containers     [label= Containers            shape= "box"        color="dodgerblue4"   URL="\ref alib_mods_contmono"    ];
-    EnumRecords    [label= EnumRecords           shape= "box"        color="dodgerblue4"   URL="\ref alib_mod_enums"        ];
-    Monomem        [label= Monomem               shape= "box"        color="dodgerblue4"   URL="\ref alib_mods_contmono"    ];
-    Singletons     [label= Singletons            shape= "box"        color="dodgerblue4"   URL="\ref alib_mod_singletons"   ];
-    Strings        [label= Strings               shape= "box"        color="dodgerblue4"   URL="\ref alib_mod_strings"      ];
+    Boxing         [label= Boxing                shape= "box"        color="dodgerblue4"   ];
+    Containers     [label= Containers            shape= "box"        color="dodgerblue4"   ];
+    EnumRecords    [label= EnumRecords           shape= "box"        color="dodgerblue4"   ];
+    Monomem        [label= Monomem               shape= "box"        color="dodgerblue4"   ];
+    Singletons     [label= Singletons            shape= "box"        color="dodgerblue4"   ];
+    Strings        [label= Strings               shape= "box"        color="dodgerblue4"   ];
 
     subgraph Modules2        {  rank="same"  ALox CLI Expressions                  color="dodgerblue4" }
     //subgraph Modules3        {  rank="same"  Monomem Strings                       color="dodgerblue4" }
