@@ -1,9 +1,12 @@
-name: Documentation
+name: Rendering Documentation
 
 on:
-  schedule:
-    - cron: '0 0 * * *'  # This runs every day at midnight UTC
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'tag to docs'
+        required: true
+
   push:
   pull_request:
 
@@ -39,7 +42,7 @@ jobs:
       id: sitemap
       uses: cicirello/generate-sitemap@v1
       with:
-        base-url-path: https://mflowcode.github.io/
+        base-url-path: https://Malmahrouqi3.github.io/
         path-to-root: build/install/docs/mfc
         include-pdf: false
         sitemap-format: txt
@@ -57,18 +60,18 @@ jobs:
         fail: false
 
     - name: Publish Documentation
-      if:   github.repository == 'MFlowCode/MFC' && github.ref == 'refs/heads/master' &&  (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' )
       run:  |
         set +e
-        git ls-remote "${{ secrets.DOC_PUSH_URL }}" -q
+        git ls-remote "https://Malmahrouqi3:${{ secrets.TOKEN }}@github.com/Malmahrouqi3/malmahrouqi3.github.io" -q
         if [ "$?" -ne "0" ]; then exit 0; fi
         set -e
         git config --global user.name  'MFC Action'
         git config --global user.email '<>'
-        git clone "${{ secrets.DOC_PUSH_URL }}" ../www
+        git clone "https://Malmahrouqi3:${{ secrets.TOKEN }}@github.com/Malmahrouqi3/malmahrouqi3.github.io" ../www
         rm -rf ../www/*
         mv build/install/docs/mfc/* ../www/
         git -C ../www add -A
+        git -C ../www restore documentation/data.js
         git -C ../www commit -m "Docs @ ${GITHUB_SHA::7}" || true
         git -C ../www push
 

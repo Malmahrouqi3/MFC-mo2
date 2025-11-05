@@ -1,0 +1,83 @@
+name: Reporting Benchmark Results
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'tag to bench'
+        required: true
+
+permissions:
+  contents: write
+  deployments: write
+  pages: write
+  id-token: write
+
+jobs:
+  self:
+    name: "Continuous Benchmarking"
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone - PR
+        uses: actions/checkout@v4
+        with:
+          path: pr
+
+      - name: Setup
+        run: | 
+          sudo apt-get update -y
+          sudo apt-get install -y cmake gcc g++ python3 python3-dev hdf5-tools \
+                    libfftw3-dev libhdf5-dev openmpi-bin libopenmpi-dev
+
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: GT Phoenix (CPU)
+          tool: 'googlecpp'
+          output-file-path: pr/report.json
+          github-token: ${{ secrets.TOKEN }}
+          auto-push: true
+          alert-threshold: '200%'
+          comment-on-alert: true
+          fail-on-alert: true
+          gh-repository: 'github.com/Malmahrouqi3/malmahrouqi3.github.io'
+          gh-pages-branch: 'main'
+          benchmark-data-dir-path: 'documentation'
+          
+      - name: Clean benchmark data repository directory
+        run: |
+          if [ -d "./benchmark-data-repository" ]; then
+            rm -rf ./benchmark-data-repository
+          fi
+
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: GT Phoenix (GPU)
+          tool: 'googlecpp'
+          output-file-path: pr/report.json
+          github-token: ${{ secrets.TOKEN }}
+          auto-push: true
+          alert-threshold: '200%'
+          comment-on-alert: true
+          fail-on-alert: true
+          gh-repository: 'github.com/Malmahrouqi3/malmahrouqi3.github.io'
+          gh-pages-branch: 'main'
+          benchmark-data-dir-path: 'documentation'
+          
+      - name: Polishing Data.js
+        run:  |
+          set +e
+          git ls-remote "https://Malmahrouqi3:${{ secrets.TOKEN }}@github.com/Malmahrouqi3/malmahrouqi3.github.io" -q
+          if [ "$?" -ne "0" ]; then exit 0; fi
+          set -e
+          git config --global user.name  'MFC Action'
+          git config --global user.email '<>'
+          git clone "https://Malmahrouqi3:${{ secrets.TOKEN }}@github.com/Malmahrouqi3/malmahrouqi3.github.io" ../www
+          sed -i 's/"unit": "s\/iter"/"unit": "s"/g; s/cpu: /runtime: /g; s/iterations: /time steps: /g' ../www/documentation/data.js
+          git -C ../www add documentation/data.js
+          git -C ../www commit -m "Docs @ ${GITHUB_SHA::7}" || true
+          git -C ../www push

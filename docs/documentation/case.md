@@ -65,6 +65,92 @@ For example, to run the `scaling` case in "weak-scaling" mode:
 ```shell
 ./mfc.sh run examples/scaling/case.py -t pre_process -j 8 -- --scaling weak
 ```
+## Features
+The following diagram displays feature-mapping hierarchy. To properly setup, ensure there is a direct correlation from parent feature to sub-features.
+
+\dot
+digraph MFC_features
+{
+    newrank=true
+    compound=true;
+    fontsize="10";
+    fontname="Open Sans";
+
+    node [shape=plaintext, fontsize="10", fontname="Open Sans"]
+                           
+    Bootstrap      [label= "Bootstrap"   shape= "box"        color="black" penwidth=2   URL="\ref alib_mod_bs"           ];
+
+    //--- ALib Camps ---
+//  Application    [label= Application     shape= "component" style="bold" color="chocolate"   URL="\ref alib_mod_app"          ];
+    ALox           [label= ALox            shape= "component" style="bold" color="chocolate"   URL="\ref alib_mod_alox"         ];
+    Camp           [label= Camp            shape= "component" style="bold" color="chocolate4"  URL="\ref alib_mod_camp"         ];
+    CLI            [label= CLI             shape= "component" style="bold" color="chocolate"   URL="\ref alib_mod_cli"          ];
+    Expressions    [label= Expressions     shape= "component" style="bold" color="chocolate"   URL="\ref alib_mod_expressions"  ];
+    Files          [label= Files           shape= "component" style="bold" color="chocolate"   URL="\ref alib_mod_files"        ];
+
+    Bootstrap      -> { ALox CLI Expressions Files }          [ color="gray69"  style=dotted, penwidth=2 ];
+
+    //--- Below Camp ---
+    Format           [label= Format       shape= "box" color="dodgerblue4"  URL="\ref alib_mod_format"     ];
+    Exceptions       [label= Exceptions   shape= "box" color="dodgerblue4"  URL="\ref alib_mod_exceptions" ];
+    Resources        [label= Resources    shape= "box" color="dodgerblue4"  URL="\ref alib_mod_resources"  ];
+    System           [label= System       shape= "box" color="dodgerblue4"  URL="\ref alib_mod_system"     ];
+    Variables        [label= Variables    shape= "box" color="dodgerblue4"  URL="\ref alib_mod_variables"  ];
+
+
+  //Application     -> { CLI ALox                      }  [ color="midnightblue" ];
+  //Application     -> { Files Expressions ThreadModel }  [ color="gray69"  style=dotted, penwidth=2 ];
+    Files           -> { Expressions ALox                }  [ color="gray69"  style=dotted, penwidth=2 ];
+    Files           -> { Camp                            }  [ color="midnightblue" ];
+    CLI             -> { Camp                            }  [ color="midnightblue" ];
+    Expressions     -> { Camp                            }  [ color="midnightblue" ];
+    ALox            -> { Camp                            }  [ color="midnightblue" ];
+
+    Variables       -> { System Monomem Containers       }  [ color="gray15" ];
+    Camp            -> { Format Variables                }  [ color="gray15" ];
+    Format          -> { Exceptions                      }  [ color="gray15" ];
+    Exceptions      -> { Resources Boxing EnumRecords    }  [ color="gray15" ];
+    System          -> { Boxing EnumRecords              }  [ color="gray15" ];
+    Resources       -> { Strings Containers Monomem      }  [ color="gray15" ];
+
+                            
+    ThreadModel    [label= ThreadModel           shape= "box"        color="dodgerblue4"     style="bold"  URL="\ref alib_mod_threads"      ];
+    BitBuffer      [label= BitBuffer             shape= "box"        color="dodgerblue4"     style="bold"  URL="\ref alib_mod_bitbuffer"    ];
+                                                 
+    Boxing         [label= Boxing                shape= "box"        color="dodgerblue4"   URL="\ref alib_mod_boxing"       ];
+    Containers     [label= Containers            shape= "box"        color="dodgerblue4"   URL="\ref alib_mods_contmono"    ];
+    EnumRecords    [label= EnumRecords           shape= "box"        color="dodgerblue4"   URL="\ref alib_mod_enums"        ];
+    Monomem        [label= Monomem               shape= "box"        color="dodgerblue4"   URL="\ref alib_mods_contmono"    ];
+    Singletons     [label= Singletons            shape= "box"        color="dodgerblue4"   URL="\ref alib_mod_singletons"   ];
+    Strings        [label= Strings               shape= "box"        color="dodgerblue4"   URL="\ref alib_mod_strings"      ];
+
+    subgraph Modules2        {  rank="same"  ALox CLI Expressions                  color="dodgerblue4" }
+    //subgraph Modules3        {  rank="same"  Monomem Strings                       color="dodgerblue4" }
+                                                
+    //--- dependencies base module -> base module 
+    BitBuffer       -> { Monomem Containers }            [ color="gray15"  ];
+    ThreadModel     -> { Boxing Containers Monomem }     [ color="gray15"  ];
+
+
+    //--- dependencies base module -> base module 
+    Boxing          -> { Singletons          }            [ color="gray15"  ];
+    EnumRecords     -> { Singletons  Strings }            [ color="gray15"  ];
+
+     
+    // optional dependencies
+    Singletons      -> { Monomem Containers }          [ color="gray69"  style=dotted, penwidth=2 ];
+    Boxing          -> { Monomem Containers Strings}   [ color="gray69"  style=dotted, penwidth=2 ];
+    Containers      -> { Strings  }                    [ color="gray69"  style=dotted, penwidth=2 ];
+    Strings         -> { Monomem  }                    [ color="gray69"  style=dotted, penwidth=2 ];
+    EnumRecords     -> { Monomem Containers Boxing }   [ color="gray69"  style=dotted, penwidth=2 ];
+    Containers      -> { Monomem  }                    [ color="gray69"  style=dotted, penwidth=2 ];
+    BitBuffer       -> { EnumRecords  }                [ color="gray69"  style=dotted, penwidth=2 ];
+    Resources       -> { EnumRecords  }                [ color="gray69"  style=dotted, penwidth=2 ];
+    ThreadModel     -> { EnumRecords Strings }         [ color="gray69"  style=dotted, penwidth=2 ];
+    System          -> { Monomem Exceptions }          [ color="gray69"  style=dotted, penwidth=2 ];
+}
+\enddot       
+
 
 ## Parameters
 
