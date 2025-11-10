@@ -153,316 +153,142 @@ digraph MFC_features
 
 
 \htmlonly
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feature Compatibility Map</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-                
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-                
-        .content {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 0;
-            height: 700px;
-        }
-                                       
-        .reset-btn {
-            width: 100%;
-            padding: 12px;
-            background: #667eea;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        
-        .reset-btn:hover {
-            background: #5568d3;
-            transform: translateY(-1px);
-        }
-        
-        .map-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-        
-        #canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-        }
-        
-        .feature-node {
-            position: absolute;
-            padding: 15px 25px;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-weight: 500;
-            font-size: 14px;
-            user-select: none;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            z-index: 10;
-        }
-                
-        .feature-node.compatible {
-            border-color: #28a745;
-            border-width: 3px;
-            animation: pulse 2s infinite;
-        }
-        
-        .feature-node.incompatible {
-            opacity: 0.3;
-            cursor: not-allowed;
-            filter: grayscale(100%);
-        }
-        
-        .feature-node.incompatible:hover {
-            transform: none;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        @keyframes pulse {
-            0%, 100% {
-                box-shadow: 0 4px 16px rgba(40, 167, 69, 0.3);
-            }
-            50% {
-                box-shadow: 0 4px 20px rgba(40, 167, 69, 0.6);
-            }
-        }
-        
-        .connection-line {
-            position: absolute;
-            background: #28a745;
-            height: 3px;
-            transform-origin: 0 50%;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: 1;
-        }
-                
-    </style>
-</head>
-<body>
-    <div class="container">        
-        <div class="content">            
-            <div class="map-container" id="mapContainer">
-                <canvas id="canvas"></canvas>
-                <div id="featureNodes"></div>
-                </div>
-        </div>
-    </div>
+<div id="features-map" style="max-width:900px;margin:16px auto;border-radius:8px;overflow:hidden;">
+<div id="mapContainer" style="position:relative;width:100%;height:480px;background:transparent;">
+    <canvas id="canvas" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
+    <div id="featureNodes" style="position:relative;width:100%;height:100%;"></div>
+    <button id="resetBtn" style="position:absolute;right:10px;top:10px;z-index:30;padding:6px 10px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;">reset</button>
+</div>
+</div>
 
-    <script>
-        // Define features and their positions on the map
-        const features = [
-            { id: 'A', name: 'Feature A', x: 15, y: 20 },
-            { id: 'B', name: 'Feature B', x: 45, y: 15 },
-            { id: 'C', name: 'Feature C', x: 75, y: 20 },
-            { id: 'D', name: 'Feature D', x: 25, y: 50 },
-            { id: 'E', name: 'Feature E', x: 55, y: 45 },
-            { id: 'F', name: 'Feature F', x: 85, y: 55 },
-            { id: 'G', name: 'Feature G', x: 35, y: 80 },
-            { id: 'H', name: 'Feature H', x: 70, y: 85 }
-        ];
-        
-        // Compatibility matrix
-        const compatibility = {
-            'A': ['A', 'B', 'D', 'E', 'G'],
-            'B': ['A', 'B', 'C', 'E', 'F', 'H'],
-            'C': ['B', 'C', 'F', 'H'],
-            'D': ['A', 'D', 'E', 'G'],
-            'E': ['A', 'B', 'D', 'E', 'F', 'G', 'H'],
-            'F': ['B', 'C', 'E', 'F', 'H'],
-            'G': ['A', 'D', 'E', 'G'],
-            'H': ['B', 'C', 'E', 'F', 'H']
-        };
-        
-        let selectedFeatures = [];
-        let availableFeatures = features.map(f => f.id);
-        let featureElements = {};
-        
-        function initMap() {
-            const container = document.getElementById('mapContainer');
-            const nodesContainer = document.getElementById('featureNodes');
-            const rect = container.getBoundingClientRect();
-            
-            features.forEach(feature => {
-                const node = document.createElement('div');
-                node.className = 'feature-node';
-                node.textContent = feature.name;
-                node.style.left = `${feature.x}%`;
-                node.style.top = `${feature.y}%`;
-                node.style.transform = 'translate(-50%, -50%)';
-                node.onclick = () => selectFeature(feature.id);
-                
-                nodesContainer.appendChild(node);
-                featureElements[feature.id] = node;
-            });
-            
-            updateStats();
-        }
-        
-        function selectFeature(featureId) {
-            if (!availableFeatures.includes(featureId)) return;
-            
-            selectedFeatures.push(featureId);
-            updateAvailableFeatures();
-            updateUI();
-        }
-        
-        function updateAvailableFeatures() {
-            if (selectedFeatures.length === 0) {
-                availableFeatures = features.map(f => f.id);
-                return;
-            }
-            
-            availableFeatures = features
-                .map(f => f.id)
-                .filter(id => {
-                    if (selectedFeatures.includes(id)) return false;
-                    return selectedFeatures.every(selected => 
-                        compatibility[selected].includes(id)
-                    );
-                });
-        }
-        
-        function removeFeature(index) {
-            selectedFeatures = selectedFeatures.slice(0, index);
-            updateAvailableFeatures();
-            updateUI();
-        }
-        
-        function updateUI() {
-            updateNodeStates();
-            updateSelectedPath();
-            updateStats();
-            drawConnections();
-        }
-        
-        function updateNodeStates() {
-            features.forEach(feature => {
-                const node = featureElements[feature.id];
-                const isSelected = selectedFeatures.includes(feature.id);
-                const isAvailable = availableFeatures.includes(feature.id);
-                
-                node.classList.remove('selected', 'compatible', 'incompatible');
-                
-                if (isSelected) {
-                    node.classList.add('selected');
-                } else if (isAvailable) {
-                    node.classList.add('compatible');
-                } else {
-                    node.classList.add('incompatible');
-                }
-            });
-        }
-        
-        function updateSelectedPath() {
-            const pathPanel = document.getElementById('selectedPath');
-            const pathList = document.getElementById('pathList');
-            
-            if (selectedFeatures.length === 0) {
-                pathPanel.style.display = 'none';
-                return;
-            }
-            
-            pathPanel.style.display = 'block';
-            pathList.innerHTML = '';
-            
-            selectedFeatures.forEach((featureId, index) => {
-                const feature = features.find(f => f.id === featureId);
-                const item = document.createElement('div');
-                item.className = 'path-item';
-                item.innerHTML = `
-                    <span class="number">${index + 1}</span>
-                    <span style="flex: 1;">${feature.name}</span>
-                    <button class="remove-btn" onclick="removeFeature(${index})">×</button>
-                `;
-                pathList.appendChild(item);
-            });
-        }
-        
-        function updateStats() {
-            document.getElementById('selectedCount').textContent = selectedFeatures.length;
-            document.getElementById('availableCount').textContent = availableFeatures.length;
-            document.getElementById('totalCount').textContent = features.length;
-        }
-        
-        function drawConnections() {
-            const canvas = document.getElementById('canvas');
-            const container = document.getElementById('mapContainer');
-            const rect = container.getBoundingClientRect();
-            
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-            
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            if (selectedFeatures.length === 0) return;
-            
-            selectedFeatures.forEach(selectedId => {
-                const selectedFeature = features.find(f => f.id === selectedId);
-                const selectedNode = featureElements[selectedId];
-                const selectedRect = selectedNode.getBoundingClientRect();
-                const startX = selectedRect.left - rect.left + selectedRect.width / 2;
-                const startY = selectedRect.top - rect.top + selectedRect.height / 2;
-                
-                availableFeatures.forEach(availableId => {
-                    if (compatibility[selectedId].includes(availableId)) {
-                        const availableFeature = features.find(f => f.id === availableId);
-                        const availableNode = featureElements[availableId];
-                        const availableRect = availableNode.getBoundingClientRect();
-                        const endX = availableRect.left - rect.left + availableRect.width / 2;
-                        const endY = availableRect.top - rect.top + availableRect.height / 2;
-                        
-                        ctx.strokeStyle = '#28a745';
-                        ctx.lineWidth = 2;
-                        ctx.globalAlpha = 0.3;
-                        ctx.beginPath();
-                        ctx.moveTo(startX, startY);
-                        ctx.lineTo(endX, endY);
-                        ctx.stroke();
-                    }
-                });
-            });
-            
-            ctx.globalAlpha = 1;
-        }
-        
-        function resetSelection() {
-            selectedFeatures = [];
-            availableFeatures = features.map(f => f.id);
-            updateUI();
-        }
-        
-        // Initialize
-        initMap();
-    </script>
-</body>
-</html>
+<style>
+#mapContainer .feature-node { color: #222 !important; }
+#mapContainer .feature-node.selected { color: #fff !important; } /* keep selected text white */
+#mapContainer #resetBtn { color: #222 !important; }
+
+.feature-node{
+    position:absolute;padding:10px 14px;border-radius:999px;font-weight:600;font-size:13px;
+    transform:translate(-50%,-50%);cursor:pointer;z-index:20;background:#fff;border:2px solid transparent;
+    box-shadow:0 4px 14px rgba(0,0,0,0.06);white-space:nowrap;
+}
+.feature-node.compatible{border-color:#28a745;opacity:1}
+.feature-node.incompatible{opacity:.28;filter:grayscale(.6);cursor:not-allowed}
+.feature-node.selected{background:#3572a5;color:#fff;border-color:#3572a5;box-shadow:0 8px 24px rgba(53,114,165,.18)}
+</style>
+
+<script>
+    // Define features and their positions on the map
+    const features = [
+        { id: 'A', name: 'Feature A', x: 15, y: 20 },
+        { id: 'B', name: 'Feature B', x: 45, y: 15 },
+        { id: 'C', name: 'Feature C', x: 75, y: 20 },
+        { id: 'D', name: 'Feature D', x: 25, y: 50 },
+        { id: 'E', name: 'Feature E', x: 55, y: 45 },
+        { id: 'F', name: 'Feature F', x: 85, y: 55 },
+        { id: 'G', name: 'Feature G', x: 35, y: 80 },
+        { id: 'H', name: 'Feature H', x: 70, y: 85 }
+    ];
+    
+    // Compatibility matrix
+    const compatibility = {
+        'A': ['A', 'B', 'D', 'E', 'G'],
+        'B': ['A', 'B', 'C', 'E', 'F', 'H'],
+        'C': ['B', 'C', 'F', 'H'],
+        'D': ['A', 'D', 'E', 'G'],
+        'E': ['A', 'B', 'D', 'E', 'F', 'G', 'H'],
+        'F': ['B', 'C', 'E', 'F', 'H'],
+        'G': ['A', 'D', 'E', 'G'],
+        'H': ['B', 'C', 'E', 'F', 'H']
+    };
+    
+      let selected = [];
+      let available = features.map(f=>f.id);
+      const elMap = document.getElementById('mapContainer');
+      const nodesEl = document.getElementById('featureNodes');
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext && canvas.getContext('2d');
+      const elems = {};
+
+      function resizeCanvas(){
+        const r = elMap.getBoundingClientRect();
+        canvas.width = r.width * devicePixelRatio;
+        canvas.height = r.height * devicePixelRatio;
+        canvas.style.width = r.width + 'px';
+        canvas.style.height = r.height + 'px';
+        if(ctx) ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+      }
+
+      function init(){
+        features.forEach(f=>{
+          const d = document.createElement('div');
+          d.className = 'feature-node';
+          d.textContent = f.name;
+          d.style.left = f.x + '%';
+          d.style.top = f.y + '%';
+          d.addEventListener('click',()=>onClick(f.id));
+          nodesEl.appendChild(d);
+          elems[f.id]=d;
+        });
+        window.addEventListener('resize',()=>{ resizeCanvas(); draw(); });
+        document.getElementById('resetBtn').addEventListener('click',reset);
+        resizeCanvas(); updateStates(); draw();
+      }
+
+      function onClick(id){
+        if(!available.includes(id) && !selected.includes(id)) return;
+        if(selected.includes(id)) {
+          const i = selected.indexOf(id);
+          selected = selected.slice(0,i);
+        } else selected.push(id);
+        updateAvailable();
+        updateStates();
+        draw();
+      }
+
+      function updateAvailable(){
+        if(selected.length===0){ available = features.map(f=>f.id); return; }
+        available = features.map(f=>f.id).filter(id=>{
+          if (selected.includes(id)) return false;
+          return selected.every(s=> (compatibility[s]||[]).includes(id) );
+        });
+      }
+
+      function updateStates(){
+        features.forEach(f=>{
+          const n = elems[f.id];
+          n.classList.remove('compatible','incompatible','selected');
+          if(selected.includes(f.id)) n.classList.add('selected');
+          else if(available.includes(f.id)) n.classList.add('compatible');
+          else n.classList.add('incompatible');
+        });
+      }
+
+      function draw(){
+        if(!ctx) return;
+        const rect = elMap.getBoundingClientRect();
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        if(selected.length===0) return;
+        selected.forEach(sid=>{
+          const sEl = elems[sid].getBoundingClientRect();
+          const sx = sEl.left - rect.left + sEl.width/2;
+          const sy = sEl.top  - rect.top  + sEl.height/2;
+          available.forEach(aid=>{
+            if(!(compatibility[sid]||[]).includes(aid)) return;
+            const aEl = elems[aid].getBoundingClientRect();
+            const ex = aEl.left - rect.left + aEl.width/2;
+            const ey = aEl.top  - rect.top  + aEl.height/2;
+            ctx.beginPath();
+            ctx.strokeStyle = '#28a745'; ctx.lineWidth = 2; ctx.globalAlpha = 0.28;
+            const mx = (sx+ex)/2, my = (sy+ey)/2;
+            ctx.moveTo(sx,sy); ctx.quadraticCurveTo(mx,my-30,ex,ey); ctx.stroke();
+          });
+        });
+        ctx.globalAlpha = 1;
+      }
+      function reset(){ selected=[]; available = features.map(f=>f.id); updateStates(); draw(); }
+      init();
+  </script>
+</script>
 \endhtmlonly
 
 
