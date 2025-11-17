@@ -6,9 +6,9 @@ cmake_minimum_required(VERSION 3.12)
 project(MFC-Dependencies LANGUAGES C CXX Fortran)
 
 list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/regular")
-if (CMAKE_Fortran_COMPILER_ID STREQUAL "Cray")
-    list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/cce")
-endif()
+# if (CMAKE_Fortran_COMPILER_ID STREQUAL "Cray")
+#     list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/cce")
+# endif()
 
 set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS ON)
 
@@ -48,15 +48,12 @@ endif()
 
 
 # HDF5
+set(HDF5_WAS_BUILT OFF)
 if (MFC_HDF5)
-    find_package(HDF5)
-    if (HDF5_FOUND)
-        message(STATUS "HDF5 found.")
-        add_custom_target(hdf5)
-    else()
+        set(HDF5_WAS_BUILT ON)
         ExternalProject_Add(hdf5
             GIT_REPOSITORY "https://github.com/HDFGroup/hdf5"
-            GIT_TAG        hdf5-1_12_2
+            GIT_TAG        hdf5_1.14.6
             GIT_SHALLOW    ON
             GIT_PROGRESS   ON
             CMAKE_ARGS     "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
@@ -67,22 +64,39 @@ if (MFC_HDF5)
                             -DHDF5_BUILD_TOOLS=ON
                             -DHDF5_BUILD_EXAMPLES=OFF
         )
-    endif()
 endif()
-
 
 # SILO
 if (MFC_SILO)
-    find_package(SILO)
+    # First, try to find HDF5 (either pre-installed or from CMAKE_INSTALL_PREFIX)
+    find_package(HDF5 QUIET)
+    
+    # If not found, check if we're building it or if user enabled the option
+    if (NOT HDF5_FOUND AND NOT MFC_HDF5)
+        message(FATAL_ERROR "SILO requires HDF5. Please enable MFC_HDF5 with --hdf5 flag or install HDF5 separately.")
+    endif()
+
+    find_package(SILO QUIET)
     if (SILO_FOUND)
         message(STATUS "SILO found.")
         add_custom_target(silo)
     else()
         find_package(Git REQUIRED)
+        
+        # Use the CMAKE_INSTALL_PREFIX as the HDF5 location (where we just built it)
+        set(HDF5_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
+
+        # Set dependency only if HDF5 was built in this superbuild
+        set(SILO_DEPENDS_CLAUSE)
+        if (HDF5_WAS_BUILT)
+            set(SILO_DEPENDS_CLAUSE DEPENDS hdf5)
+        endif()
 
         ExternalProject_Add(silo
+            ${SILO_DEPENDS_CLAUSE}
             GIT_REPOSITORY "https://github.com/LLNL/Silo"
-            GIT_TAG        main
+            GIT_TAG        4.12.0-pre2
+            GIT_SHALLOW    ON
             GIT_PROGRESS   ON
             PATCH_COMMAND  "${GIT_EXECUTABLE}" stash
                         && "${GIT_EXECUTABLE}" apply "${CMAKE_SOURCE_DIR}/Silo.patch"
@@ -90,11 +104,12 @@ if (MFC_SILO)
                            -DSILO_ENABLE_SILOCK=OFF
                            -DSILO_ENABLE_BROWSER=OFF
                            -DFIND_LIBRARY_USE_LIB64_PATHS=ON
-                           "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
+                           "-DSILO_HDF5_DIR=${HDF5_INSTALL_PREFIX}"
+                           "-DCMAKE_PREFIX_PATH=${HDF5_INSTALL_PREFIX};${CMAKE_PREFIX_PATH}"
                            "-DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}"
                            "-DCMAKE_FIND_PACKAGE_REDIRECTS_DIR=${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}"
                            "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
-                           "$<$<STREQUAL:${CMAKE_Fortran_COMPILER_ID},Cray>:-DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/../cmake/cce>"
+                           "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
         )
     endif()
 endif()
