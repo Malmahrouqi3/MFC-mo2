@@ -53,12 +53,6 @@ jobs:
         echo "url-count = ${{ steps.sitemap.outputs.url-count }}"
         echo "excluded-count = ${{ steps.sitemap.outputs.excluded-count }}"
 
-    - name: Linkcheck - Lychee
-      uses: lycheeverse/lychee-action@v2
-      with:
-        args: -c .lychee.toml build/install/docs/mfc/
-        fail: false
-
     - name: Publish Documentation
       run:  |
         set +e
