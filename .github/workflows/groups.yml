@@ -3,17 +3,17 @@ name: CI Workflow Groups
 on:
   workflow_run:
     workflows:
-      - lint-toolchain.yml
-      - lint-source.yml
-      - spelling.yml
-      - formatting.yml
-      - pmd.yml
-      - line-count.yml
-      - coverage.yml
-      - cleanliness.yml
-      - docs.yml
-      - deploy-tap.yml
-      - homebrew.yml
+      - "Lint Toolchain"
+      - "Lint Source"
+      - "Spell Check"
+      - "Pretty"
+      - "Source DRYness"
+      - "Lines of Code"
+      - "Coverage Check"
+      - "Cleanliness"
+      - "Documentation"
+      - "Deploy Homebrew Tap"
+      - "Homebrew Formula Test"
     types:
       - completed
 
