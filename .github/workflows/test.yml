@@ -1,6 +1,23 @@
 name: 'Test Suite'
 
-on: [push, pull_request, workflow_call]
+on:
+  pull_request_review:
+    types: [submitted]
+  workflow_run:
+    workflows:
+      - "Lint Toolchain"
+      - "Lint Source"
+      - "Spell Check"
+      - "Pretty"
+      - "Source DRYness"
+      - "Lines of Code"
+      - "Coverage Check"
+      - "Cleanliness"
+      - "Documentation"
+      - "Deploy Homebrew Tap"
+      - "Homebrew Formula Test"
+    types:
+      - completed
     
 jobs:
   file-changes:

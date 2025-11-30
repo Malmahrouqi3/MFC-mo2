@@ -1,10 +1,24 @@
 name: 'Benchmark'
 
 on:
-  pull_request:
   pull_request_review:
     types: [submitted]
-  workflow_call:
+  workflow_run:
+    workflows:
+      - "Lint Toolchain"
+      - "Lint Source"
+      - "Spell Check"
+      - "Pretty"
+      - "Source DRYness"
+      - "Lines of Code"
+      - "Coverage Check"
+      - "Cleanliness"
+      - "Documentation"
+      - "Deploy Homebrew Tap"
+      - "Homebrew Formula Test"
+    types:
+      - completed
+
 
 jobs:
   file-changes:
