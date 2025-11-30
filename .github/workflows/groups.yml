@@ -1,0 +1,36 @@
+name: 'CI Workflow Groups'
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  quality-checks:
+    name: Quality Checks Group
+    strategy:
+      matrix:
+        workflow:
+          - lint-toolchain
+          - lint-source
+          - spelling
+          - formatting
+          - pmd
+          - line-count
+          - coverage
+          - cleanliness
+          - docs
+          - docker
+          - deploy-tap
+          - homebrew
+      fail-fast: true
+    uses: ./.github/workflows/${{ matrix.workflow }}.yml
+
+  test-suite:
+    name: Test Suite
+    needs: quality-checks
+    if: success()
+    uses: ./.github/workflows/test.yml
+
+  benchmarks:
+    name: Benchmarks
+    needs: quality-checks
+    if: success()
+    uses: ./.github/workflows/bench.yml
