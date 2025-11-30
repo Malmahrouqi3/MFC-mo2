@@ -1,36 +1,34 @@
-name: 'CI Workflow Groups'
+name: CI Workflow Groups
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  workflow_run:
+    workflows:
+      - lint-toolchain
+      - lint-source
+      - spelling
+      - formatting
+      - pmd
+      - line-count
+      - coverage
+      - cleanliness
+      - docs
+      - deploy-tap
+      - homebrew
+    types:
+      - completed
 
 jobs:
-  quality-checks:
-    name: Quality Checks Group
-    strategy:
-      matrix:
-        workflow:
-          - lint-toolchain
-          - lint-source
-          - spelling
-          - formatting
-          - pmd
-          - line-count
-          - coverage
-          - cleanliness
-          - docs
-          - docker
-          - deploy-tap
-          - homebrew
-      fail-fast: true
-    uses: ./.github/workflows/${{ matrix.workflow }}.yml
-
+  job_in_b:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Quality Check workflows finished successfully.
+             Running testing & benchmarking workflows."
+  
   test-suite:
-    name: Test Suite
-    needs: quality-checks
-    if: success()
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     uses: ./.github/workflows/test.yml
 
   benchmarks:
-    name: Benchmarks
-    needs: quality-checks
-    if: success()
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     uses: ./.github/workflows/bench.yml
