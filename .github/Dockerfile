@@ -2,6 +2,7 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
 ARG TARGET
+ARG INTERFACE
 ARG CC_COMPILER
 ARG CXX_COMPILER
 ARG FC_COMPILER
@@ -12,13 +13,13 @@ RUN apt-get update -y && \
     if [ "$TARGET" != "gpu" ]; then \
         apt-get install -y \
             build-essential git make cmake gcc g++ gfortran bc\
-            python3 python3-venv python3-pip \
+            python3.12 python3.12-venv python3.12-pip \
             openmpi-bin libopenmpi-dev libfftw3-dev \
             mpich libmpich-dev; \
     else \
         apt-get install -y \
             build-essential git make cmake bc\
-            python3 python3-venv python3-pip \
+            python3.12 python3.12-venv python3.12-pip \
             libfftw3-dev \
             openmpi-bin libopenmpi-dev; \
     fi && \
@@ -30,6 +31,7 @@ ENV PATH="/opt/MFC:$PATH"
 
 COPY ../ /opt/MFC
 
+ENV INTERFACE=${INTERFACE}
 ENV CC=${CC_COMPILER}
 ENV CXX=${CXX_COMPILER}
 ENV FC=${FC_COMPILER}
@@ -39,14 +41,14 @@ ENV LD_LIBRARY_PATH="${COMPILER_LD_LIBRARY_PATH}:${LD_LIBRARY_PATH:-}"
 RUN echo "TARGET=$TARGET CC=$CC_COMPILER FC=$FC_COMPILER" && \
     cd /opt/MFC && \
     if [ "$TARGET" = "gpu" ]; then \
-      ./mfc.sh build --gpu -j $(nproc); \
+      ./mfc.sh build --gpu $INTERFACE -j $(nproc); \
     else \
       ./mfc.sh build -j $(nproc); \
     fi
 
 RUN cd /opt/MFC && \
     if [ "$TARGET" = "gpu" ]; then \
-      ./mfc.sh test -a --dry-run --gpu -j $(nproc); \
+      ./mfc.sh test -a --dry-run --gpu $INTERFACE -j $(nproc); \
     else \
       ./mfc.sh test -a --dry-run -j $(nproc); \
     fi
