@@ -1,10 +1,14 @@
 name: Docker Readme Update
 
-on: [push, pull_request, workflow_dispatch]
-  
+on:
+  pull_request:
+    types: [closed]
+    paths:
+      - '.github/docker_readme.md'
+
 jobs:
   Container:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -16,5 +20,5 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-          repository: sbryngelson/mfc
+          repository: mohdsaid497566/mfc
           readme-filepath: pr/.github/docker_readme.md
