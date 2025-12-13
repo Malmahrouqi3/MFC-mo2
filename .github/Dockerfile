@@ -9,22 +9,24 @@ ARG FC_COMPILER
 ARG COMPILER_PATH
 ARG COMPILER_LD_LIBRARY_PATH
 
-RUN apt-get update -y && \
-    if [ "$TARGET" != "gpu" ]; then \
-        apt-get install -y \
-            build-essential curl git make cmake gcc g++ gfortran bc\
-            python3 python3-venv python3-pip \
-            openmpi-bin libopenmpi-dev libfftw3-dev \
-            mpich libmpich-dev; \
-    else \
-        apt-get install -y \
-            build-essential curl git make cmake bc\
-            python3 python3-venv python3-pip \
-            libfftw3-dev \
-            openmpi-bin libopenmpi-dev; \
-    fi && \
-    curl -sS https://bootstrap.pypa.io/get-pip.py | python3.12 && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN echo "deb https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/ jammy main" | tee /etc/apt/sources.list.d/deadsnakes-ubuntu-ppa-lunar.list
+  apt-get update -y && \
+  apt-get python3.12
+  if [ "$TARGET" != "gpu" ]; then \
+    apt-get install -y \
+      build-essential curl git make cmake gcc g++ gfortran bc\
+      python3.12-venv python3.12-dev \
+      openmpi-bin libopenmpi-dev libfftw3-dev \
+      mpich libmpich-dev; \
+  else \
+    apt-get install -y \
+      build-essential curl git make cmake bc\
+      python3.12-venv python3.12-dev \
+      libfftw3-dev \
+      openmpi-bin libopenmpi-dev; \
+  fi && \
+  rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV OMPI_ALLOW_RUN_AS_ROOT=1
 ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
