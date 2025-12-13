@@ -10,7 +10,7 @@ ARG COMPILER_PATH
 ARG COMPILER_LD_LIBRARY_PATH
 
 
-RUN apt-get update -y && apt-get install -y wget tar xz-utils build-essential gcc openssl && \
+RUN apt-get update -y && apt-get install -y wget tar xz-utils build-essential gcc libssl-dev && \
   wget https://www.python.org/ftp/python/3.14.0/Python-3.14.0.tar.xz && \
   tar -xf Python-3.14.0.tar.xz && cd Python-3.14.0 && \
   ./configure --enable-optimizations && make -s -j $(nproc) && make install && \
