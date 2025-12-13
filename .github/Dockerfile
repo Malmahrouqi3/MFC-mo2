@@ -12,6 +12,7 @@ ARG COMPILER_LD_LIBRARY_PATH
 
 RUN echo "deb https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/ jammy main" | tee /etc/apt/sources.list.d/deadsnakes-ubuntu-ppa-lunar.list && \
   apt-get update -y && \
+  apt-get install -y ca-certificates && \
   apt-get install -y python3.12 && \
   if [ "$TARGET" != "gpu" ]; then \
     apt-get install -y \
