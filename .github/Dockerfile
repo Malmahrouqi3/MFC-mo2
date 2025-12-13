@@ -10,20 +10,18 @@ ARG COMPILER_PATH
 ARG COMPILER_LD_LIBRARY_PATH
 
 
-RUN echo "deb https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/ jammy main" | tee /etc/apt/sources.list.d/deadsnakes-ubuntu-ppa-lunar.list && \
-  apt-get update -y && \
-  apt-get install -y ca-certificates && \
-  apt-get install -y python3.12 && \
+RUN apt-get update -y && \
+  wget https://www.python.org/ftp/python/3.14.0/Python-3.14.0.tar.xz && \
+  tar -xf Python-3.14.0.tar.xz && cd Python-3.14.0 && \
+  ./configure --enable-optimizations && make -s -j $(nproc) && make install && \
   if [ "$TARGET" != "gpu" ]; then \
     apt-get install -y \
       build-essential curl git make cmake gcc g++ gfortran bc\
-      python3.12-venv python3.12-dev \
       openmpi-bin libopenmpi-dev libfftw3-dev \
       mpich libmpich-dev; \
   else \
     apt-get install -y \
       build-essential curl git make cmake bc\
-      python3.12-venv python3.12-dev \
       libfftw3-dev \
       openmpi-bin libopenmpi-dev; \
   fi && \
