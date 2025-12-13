@@ -11,21 +11,22 @@ ARG COMPILER_LD_LIBRARY_PATH
 
 
 RUN apt-get update -y && apt-get install -y wget tar xz-utils build-essential gcc libssl-dev zlib1g-dev && \
-  wget https://www.python.org/ftp/python/3.12.0/Python-3.12.0.tar.xz && \
-  tar -xf Python-3.12.0.tar.xz && cd Python-3.12.0 && \
-  ./configure && make -s -j $(nproc) && make install && \
-  if [ "$TARGET" != "gpu" ]; then \
-    apt-get install -y \
-      build-essential curl git make cmake g++ gfortran bc\
-      openmpi-bin libopenmpi-dev libfftw3-dev \
-      mpich libmpich-dev; \
-  else \
-    apt-get install -y \
-      build-essential curl git make cmake bc\
-      libfftw3-dev \
-      openmpi-bin libopenmpi-dev; \
-  fi && \
-  rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    apt-get build-dep -y python3 && apt-get install -y pkg-config && \
+    wget https://www.python.org/ftp/python/3.12.0/Python-3.12.0.tar.xz && \
+    tar -xf Python-3.12.0.tar.xz && cd Python-3.12.0 && \
+    ./configure && make -s -j $(nproc) && make install && \
+    if [ "$TARGET" != "gpu" ]; then \
+      apt-get install -y \
+        build-essential curl git make cmake g++ gfortran bc\
+        openmpi-bin libopenmpi-dev libfftw3-dev \
+        mpich libmpich-dev; \
+    else \
+      apt-get install -y \
+        build-essential curl git make cmake bc\
+        libfftw3-dev \
+        openmpi-bin libopenmpi-dev; \
+    fi && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV OMPI_ALLOW_RUN_AS_ROOT=1
 ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
