@@ -29,6 +29,10 @@ jobs:
         with:
           script: |
             const tags = '${{ steps.tags.outputs.tags }}'.split(' ').filter(Boolean);
+            const WORKFLOW_CREATION_DELAY_MS = 5000; // Time to wait for workflow to be created
+            const POLL_INTERVAL_MS = 5000; // Time between polling attempts
+            const COMPLETION_CHECK_INTERVAL_MS = 15000; // Time between completion checks
+            
             for (const tag of tags) {
               const beforeDispatch = Date.now();
               
@@ -36,12 +40,12 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 workflow_id: 'docker.yml',
-                ref: context.ref.replace('refs/heads/', ''),
+                ref: context.ref.split('/').slice(2).join('/'),
                 inputs: { tag }
               });
 
               // Wait a bit for the workflow to be created
-              await new Promise(resolve => setTimeout(resolve, 5000));
+              await new Promise(resolve => setTimeout(resolve, WORKFLOW_CREATION_DELAY_MS));
 
               let runId = null;
               for (let i = 0; i < 60; i++) { // Try for up to 300 seconds
@@ -65,7 +69,7 @@ jobs:
                   console.log(`Found workflow run ${runId} for tag ${tag}`);
                   break;
                 }
-                await new Promise(resolve => setTimeout(resolve, 5000));
+                await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS));
               }
               
               if (!runId) {
@@ -89,7 +93,7 @@ jobs:
                   completed = true;
                   console.log(`Workflow run ${runId} (tag: ${tag}) completed successfully`);
                 } else {
-                  await new Promise(resolve => setTimeout(resolve, 15000));
+                  await new Promise(resolve => setTimeout(resolve, COMPLETION_CHECK_INTERVAL_MS));
                 }
               }
             }
