@@ -8,10 +8,10 @@ ARG FC_COMPILER
 ARG COMPILER_PATH
 ARG COMPILER_LD_LIBRARY_PATH
 
-RUN apt-get install software-properties-common && \
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
     add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && \
-    apt-get install python3.12
+    apt-get install -y python3.12
 
 RUN apt-get update -y && \
     if [ "$TARGET" != "gpu" ]; then \
