@@ -8,7 +8,8 @@ ARG FC_COMPILER
 ARG COMPILER_PATH
 ARG COMPILER_LD_LIBRARY_PATH
 
-RUN add-apt-repository ppa:deadsnakes/ppa && \
+RUN apt-get install software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install python3.12
 
