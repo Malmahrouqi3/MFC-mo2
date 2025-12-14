@@ -19,8 +19,8 @@ jobs:
             # - { name: 'cpu',  interface: 'none', runner: 'ubuntu-22.04',         base_image: 'ubuntu:22.04' }
             # - { name: 'gpu',  interface: 'acc',  runner: 'ubuntu-22.04',         base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
             # - { name: 'gpu',  interface: 'acc',  runner: 'ubuntu-22.04-arm',     base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
-            - { name: 'gpu',  interface: 'omp',  runner: 'ubuntu-22.04',         base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
-            - { name: 'gpu',  interface: 'omp',  runner: 'ubuntu-22.04-arm',     base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
+            - { name: 'gpu',  interface: 'mp',  runner: 'ubuntu-22.04',         base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
+            - { name: 'gpu',  interface: 'mp',  runner: 'ubuntu-22.04-arm',     base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
 
     runs-on: ${{ matrix.config.runner }}
     steps:
