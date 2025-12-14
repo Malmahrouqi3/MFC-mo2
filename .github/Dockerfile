@@ -10,7 +10,7 @@ ARG COMPILER_PATH
 ARG COMPILER_LD_LIBRARY_PATH
 
 RUN DEBIAN_FRONTEND=noninteractive \
-    TZ=US/Eastern && \
+    TZ=US/Eastern
 
 RUN apt-get update -y && apt-get install -y tzdata wget tar xz-utils build-essential gcc libssl-dev zlib1g-dev && \
     apt-get install -y wget tar xz-utils build-essential gcc libssl-dev zlib1g-dev \
