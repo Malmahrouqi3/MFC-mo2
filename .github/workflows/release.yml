@@ -36,8 +36,8 @@ jobs:
             const MAX_POLL_ATTEMPTS = 60; // Maximum attempts to find workflow run (300 seconds total)
             
             for (const tag of tags) {
-              // Capture time before dispatch with a buffer for clock skew
-              const beforeDispatch = Date.now() - CLOCK_SKEW_BUFFER_MS;
+              // Capture time before dispatch; subtract buffer to account for clock skew/precision differences
+              const earliestValidTime = Date.now() - CLOCK_SKEW_BUFFER_MS;
               
               await github.rest.actions.createWorkflowDispatch({
                 owner: context.repo.owner,
@@ -63,7 +63,7 @@ jobs:
                 // Find a run that was created after we dispatched
                 const found = runs.data.workflow_runs.find(run => {
                   const runCreatedAt = new Date(run.created_at).getTime();
-                  return runCreatedAt >= beforeDispatch && 
+                  return runCreatedAt >= earliestValidTime && 
                          ['queued', 'in_progress', 'waiting'].includes(run.status);
                 });
                 
