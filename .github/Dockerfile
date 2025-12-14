@@ -8,17 +8,21 @@ ARG FC_COMPILER
 ARG COMPILER_PATH
 ARG COMPILER_LD_LIBRARY_PATH
 
+RUN add-apt-repository ppa:deadsnakes/ppa
+    apt update
+    apt install python3.12
+
 RUN apt-get update -y && \
     if [ "$TARGET" != "gpu" ]; then \
         apt-get install -y \
             build-essential git make cmake gcc g++ gfortran bc \
-            python3 python3-venv python3-pip \
+            python3.12 python3.12-venv python3.12-pip \
             openmpi-bin libopenmpi-dev libfftw3-dev \
             mpich libmpich-dev; \
     else \
         apt-get install -y \
             build-essential git make cmake bc \
-            python3 python3-venv python3-pip \
+            python3.12 python3.12-venv python3.12-pip \
             libfftw3-dev \
             openmpi-bin libopenmpi-dev; \
     fi && \
