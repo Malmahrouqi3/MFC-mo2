@@ -8,8 +8,8 @@ ARG FC_COMPILER
 ARG COMPILER_PATH
 ARG COMPILER_LD_LIBRARY_PATH
 
-RUN add-apt-repository ppa:deadsnakes/ppa
-    apt-get update
+RUN add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
     apt-get install python3.12
 
 RUN apt-get update -y && \
