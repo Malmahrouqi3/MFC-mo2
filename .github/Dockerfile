@@ -9,7 +9,8 @@ ARG FC_COMPILER
 ARG COMPILER_PATH
 ARG COMPILER_LD_LIBRARY_PATH
 
-RUN DEBIAN_FRONTEND=noninteractive \
+RUN sed -i 's/^# deb-src/deb-src/' /etc/apt/sources.list && \
+    DEBIAN_FRONTEND=noninteractive \
     TZ=US/Eastern && \
     ln -fs /usr/share/zoneinfo/US/Eastern /etc/localtime && \
     echo "US/Eastern" > /etc/timezone && \
