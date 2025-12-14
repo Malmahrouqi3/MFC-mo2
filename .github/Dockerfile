@@ -2,6 +2,7 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
 ARG TARGET
+ARG INTERFACE
 ARG CC_COMPILER
 ARG CXX_COMPILER
 ARG FC_COMPILER
@@ -38,6 +39,7 @@ ENV PATH="/opt/MFC:$PATH"
 
 COPY ../ /opt/MFC
 
+ENV INTERFACE=${INTERFACE}
 ENV CC=${CC_COMPILER}
 ENV CXX=${CXX_COMPILER}
 ENV FC=${FC_COMPILER}
@@ -47,14 +49,14 @@ ENV LD_LIBRARY_PATH="${COMPILER_LD_LIBRARY_PATH}:${LD_LIBRARY_PATH:-}"
 RUN echo "TARGET=$TARGET CC=$CC_COMPILER FC=$FC_COMPILER" && \
     cd /opt/MFC && \
     if [ "$TARGET" = "gpu" ]; then \
-      ./mfc.sh build --gpu -j $(nproc); \
+      ./mfc.sh build --gpu $INTERFACE -j $(nproc); \
     else \
       ./mfc.sh build -j $(nproc); \
     fi
 
 RUN cd /opt/MFC && \
     if [ "$TARGET" = "gpu" ]; then \
-      ./mfc.sh test -a --dry-run --gpu -j $(nproc); \
+      ./mfc.sh test -a --dry-run --gpu $INTERFACE -j $(nproc); \
     else \
       ./mfc.sh test -a --dry-run -j $(nproc); \
     fi

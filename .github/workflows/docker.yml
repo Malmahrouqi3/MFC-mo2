@@ -16,9 +16,11 @@ jobs:
     strategy:
       matrix:
         config:
-            - { name: 'cpu', runner: 'ubuntu-22.04',         base_image: 'ubuntu:22.04' }
-            # - { name: 'gpu', runner: 'ubuntu-22.04',         base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
-            # - { name: 'gpu', runner: 'ubuntu-22.04-arm',     base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
+            # - { name: 'cpu',  interface: 'none', runner: 'ubuntu-22.04',         base_image: 'ubuntu:22.04' }
+            # - { name: 'gpu',  interface: 'acc',  runner: 'ubuntu-22.04',         base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
+            # - { name: 'gpu',  interface: 'acc',  runner: 'ubuntu-22.04-arm',     base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
+            - { name: 'gpu',  interface: 'omp',  runner: 'ubuntu-22.04',         base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
+            - { name: 'gpu',  interface: 'omp',  runner: 'ubuntu-22.04-arm',     base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
 
     runs-on: ${{ matrix.config.runner }}
     steps:
@@ -126,12 +128,13 @@ jobs:
           build-args: |
             BASE_IMAGE=${{ matrix.config.base_image }}
             TARGET=${{ matrix.config.name }}
+            INTERFACE=${{ matrix.config.interface }}
             CC_COMPILER=${{ contains(matrix.config.name, 'gpu') && 'nvc' || 'gcc' }}
             CXX_COMPILER=${{ contains(matrix.config.name, 'gpu') && 'nvc++' || 'g++' }}
             FC_COMPILER=${{ contains(matrix.config.name, 'gpu') && 'nvfortran' || 'gfortran' }}
             COMPILER_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin' || '/usr/bin' }}
             COMPILER_LD_LIBRARY_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib' || '/usr/lib' }}
-          tags: sbryngelson/mfc:${{ github.event.inputs.tag }}-${{ matrix.config.name }}
+          tags: mohdsaid497566/mfc:${{ github.event.inputs.tag }}-${{ matrix.config.name }}
           push: true
 
       - name: Build and push image (gpu)
@@ -144,12 +147,13 @@ jobs:
           build-args: |
             BASE_IMAGE=${{ matrix.config.base_image }}
             TARGET=${{ matrix.config.name }}
+            INTERFACE=${{ matrix.config.interface }}
             CC_COMPILER=${{ contains(matrix.config.name, 'gpu') && 'nvc' || 'gcc' }}
             CXX_COMPILER=${{ contains(matrix.config.name, 'gpu') && 'nvc++' || 'g++' }}
             FC_COMPILER=${{ contains(matrix.config.name, 'gpu') && 'nvfortran' || 'gfortran' }}
             COMPILER_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin' || '/usr/bin' }}
             COMPILER_LD_LIBRARY_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib' || '/usr/lib' }}
-          tags: sbryngelson/mfc:${{ github.event.inputs.tag }}-${{ matrix.config.name }}-${{ matrix.config.runner}}
+          tags: mohdsaid497566/mfc:${{ github.event.inputs.tag }}-${{ matrix.config.name }}-${{ matrix.config.interface }}-${{ matrix.config.runner}}
           push: true
 
   manifests:
@@ -164,15 +168,28 @@ jobs:
 
       - name: Create and push multi-arch manifests
         run: |
-          docker buildx imagetools create -t sbryngelson/mfc:latest-cpu \
-            sbryngelson/mfc:${{ github.event.inputs.tag }}-cpu
+          # CPU Manifest
+          docker buildx imagetools create -t mohdsaid497566/mfc:latest-cpu \
+            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-cpu
+          
+          # GPU Manifest (ACC)
+          docker manifest create mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu \
+            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04 \
+            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04-arm
+          docker manifest push mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu
 
-          docker manifest create sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu \
-            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04 \
-            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04-arm
-          docker manifest push sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu
+          docker manifest create mohdsaid497566/mfc:latest-gpu \
+            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04 \
+            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04-arm
+          docker manifest push mohdsaid497566/mfc:latest-gpu
 
-          docker manifest create sbryngelson/mfc:latest-gpu \
-            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04 \
-            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-ubuntu-22.04-arm
-          docker manifest push sbryngelson/mfc:latest-gpu
+          # GPU Manifest (OMP)
+          docker manifest create mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu \
+            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-omp-ubuntu-22.04 \
+            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-omp-ubuntu-22.04-arm
+          docker manifest push mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu
+
+          docker manifest create mohdsaid497566/mfc:latest-omp-gpu \
+            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-omp-ubuntu-22.04 \
+            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-omp-ubuntu-22.04-arm
+          docker manifest push mohdsaid497566/mfc:latest-omp-gpu
