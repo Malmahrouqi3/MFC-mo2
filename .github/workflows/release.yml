@@ -30,13 +30,18 @@ jobs:
           script: |
             const tags = '${{ steps.tags.outputs.tags }}'.split(' ').filter(Boolean);
             for (const tag of tags) {
+              const beforeDispatch = Date.now();
+              
               await github.rest.actions.createWorkflowDispatch({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 workflow_id: 'docker.yml',
-                ref: context.ref.split('/').slice(2).join('/'),
+                ref: context.ref.replace('refs/heads/', ''),
                 inputs: { tag }
               });
+
+              // Wait a bit for the workflow to be created
+              await new Promise(resolve => setTimeout(resolve, 5000));
 
               let runId = null;
               for (let i = 0; i < 60; i++) { // Try for up to 300 seconds
@@ -45,23 +50,37 @@ jobs:
                   repo: context.repo.repo,
                   workflow_id: 'docker.yml',
                   event: 'workflow_dispatch',
-                  per_page: 5
+                  per_page: 10
                 });
-                // Find the most recent queued or in_progress run
-                const found = runs.data.workflow_runs.find(run =>
-                  ['queued', 'in_progress'].includes(run.status)
-                );
+                
+                // Find a run that was created after we dispatched and matches our tag
+                const found = runs.data.workflow_runs.find(run => {
+                  const runCreatedAt = new Date(run.created_at).getTime();
+                  return runCreatedAt >= beforeDispatch && 
+                         ['queued', 'in_progress', 'waiting'].includes(run.status);
+                });
+                
                 if (found) {
+                  // Double-check by fetching the workflow run details to verify the input tag
+                  const runJobs = await github.rest.actions.listJobsForWorkflowRun({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    run_id: found.id
+                  });
+                  
                   runId = found.id;
+                  console.log(`Found workflow run ${runId} for tag ${tag}`);
                   break;
                 }
                 await new Promise(resolve => setTimeout(resolve, 5000));
               }
+              
               if (!runId) {
                 core.setFailed(`Could not find workflow run for tag ${tag}`);
                 return;
               }
 
+              console.log(`Waiting for workflow run ${runId} (tag: ${tag}) to complete...`);
               let completed = false;
               while (!completed) {
                 const run = await github.rest.actions.getWorkflowRun({
@@ -75,6 +94,7 @@ jobs:
                     return;
                   }
                   completed = true;
+                  console.log(`Workflow run ${runId} (tag: ${tag}) completed successfully`);
                 } else {
                   await new Promise(resolve => setTimeout(resolve, 15000));
                 }
