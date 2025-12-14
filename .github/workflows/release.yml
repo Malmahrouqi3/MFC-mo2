@@ -34,7 +34,8 @@ jobs:
             const COMPLETION_CHECK_INTERVAL_MS = 15000; // Time between completion checks
             
             for (const tag of tags) {
-              const beforeDispatch = Date.now();
+              // Capture time before dispatch with a 1-second buffer for clock skew
+              const beforeDispatch = Date.now() - 1000;
               
               await github.rest.actions.createWorkflowDispatch({
                 owner: context.repo.owner,
