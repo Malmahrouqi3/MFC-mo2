@@ -12,7 +12,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
     add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get install -y python3.12
 
 RUN apt-get update -y && \
     if [ "$TARGET" != "gpu" ]; then \
