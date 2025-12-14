@@ -17,13 +17,13 @@ RUN apt-get update -y && \
     if [ "$TARGET" != "gpu" ]; then \
         apt-get install -y \
             build-essential git make cmake gcc g++ gfortran bc \
-            python3.12 python3.12-venv python3.12-pip \
+            python3.12 python3.12-venv python3.12 \
             openmpi-bin libopenmpi-dev libfftw3-dev \
             mpich libmpich-dev; \
     else \
         apt-get install -y \
             build-essential git make cmake bc \
-            python3.12 python3.12-venv python3.12-pip \
+            python3.12 python3.12-venv \
             libfftw3-dev \
             openmpi-bin libopenmpi-dev; \
     fi && \
