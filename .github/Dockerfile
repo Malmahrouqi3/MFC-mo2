@@ -11,7 +11,7 @@ ARG COMPILER_LD_LIBRARY_PATH
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
-    add-apt-repository ppa:deadsnakes/ppa && \
+    add-apt-repository ppa:deadsnakes/ppa
 
 RUN apt-get update -y && \
     if [ "$TARGET" != "gpu" ]; then \
