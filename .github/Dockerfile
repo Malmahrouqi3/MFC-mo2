@@ -9,8 +9,8 @@ ARG COMPILER_PATH
 ARG COMPILER_LD_LIBRARY_PATH
 
 RUN add-apt-repository ppa:deadsnakes/ppa
-    apt update
-    apt install python3.12
+    apt-get update
+    apt-get install python3.12
 
 RUN apt-get update -y && \
     if [ "$TARGET" != "gpu" ]; then \
