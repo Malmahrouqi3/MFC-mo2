@@ -184,12 +184,12 @@ jobs:
           # docker manifest push sbryngelson/mfc:latest-gpu
 
           # GPU Manifest (OMP)
-          docker manifest create sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu \
-            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-omp-ubuntu-22.04 \
-            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-omp-ubuntu-22.04-arm
-          docker manifest push sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu
+          docker manifest create sbryngelson/mfc:${{ github.event.inputs.tag }}-mp-gpu \
+            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-mp-ubuntu-22.04 \
+            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-mp-ubuntu-22.04-arm
+          docker manifest push sbryngelson/mfc:${{ github.event.inputs.tag }}-mp-gpu
 
-          docker manifest create sbryngelson/mfc:latest-omp-gpu \
-            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-omp-ubuntu-22.04 \
-            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-omp-ubuntu-22.04-arm
-          docker manifest push sbryngelson/mfc:latest-omp-gpu
+          docker manifest create sbryngelson/mfc:latest-mp-gpu \
+            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-mp-ubuntu-22.04 \
+            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-mp-ubuntu-22.04-arm
+          docker manifest push sbryngelson/mfc:latest-mp-gpu
