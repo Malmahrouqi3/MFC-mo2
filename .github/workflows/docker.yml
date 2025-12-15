@@ -153,7 +153,7 @@ jobs:
             FC_COMPILER=${{ contains(matrix.config.name, 'gpu') && 'nvfortran' || 'gfortran' }}
             COMPILER_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/bin' || '/usr/bin' }}
             COMPILER_LD_LIBRARY_PATH=${{ contains(matrix.config.name, 'gpu') && '/opt/nvidia/hpc_sdk/Linux_x86_64/compilers/lib' || '/usr/lib' }}
-          tags: mohdsaid497566/mfc:${{ github.event.inputs.tag }}-${{ matrix.config.name }}-${{ matrix.config.interface }}-${{ matrix.config.runner}}
+          tags: sbryngelson/mfc:${{ github.event.inputs.tag }}-${{ matrix.config.name }}-${{ matrix.config.interface }}-${{ matrix.config.runner}}
           push: true
 
   manifests:
@@ -169,27 +169,27 @@ jobs:
       - name: Create and push multi-arch manifests
         run: |
           # CPU Manifest
-          docker buildx imagetools create -t mohdsaid497566/mfc:latest-cpu \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-cpu
+          # docker buildx imagetools create -t sbryngelson/mfc:latest-cpu \
+          #   sbryngelson/mfc:${{ github.event.inputs.tag }}-cpu
           
           # GPU Manifest (ACC)
-          docker manifest create mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04 \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04-arm
-          docker manifest push mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu
+          # docker manifest create sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu \
+          #   sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04 \
+          #   sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04-arm
+          # docker manifest push sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu
 
-          docker manifest create mohdsaid497566/mfc:latest-gpu \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04 \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04-arm
-          docker manifest push mohdsaid497566/mfc:latest-gpu
+          # docker manifest create sbryngelson/mfc:latest-gpu \
+          #   sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04 \
+          #   sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04-arm
+          # docker manifest push sbryngelson/mfc:latest-gpu
 
           # GPU Manifest (OMP)
-          docker manifest create mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-omp-ubuntu-22.04 \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-omp-ubuntu-22.04-arm
-          docker manifest push mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu
+          docker manifest create sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu \
+            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-omp-ubuntu-22.04 \
+            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-omp-ubuntu-22.04-arm
+          docker manifest push sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu
 
-          docker manifest create mohdsaid497566/mfc:latest-omp-gpu \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-omp-ubuntu-22.04 \
-            mohdsaid497566/mfc:${{ github.event.inputs.tag }}-gpu-omp-ubuntu-22.04-arm
-          docker manifest push mohdsaid497566/mfc:latest-omp-gpu
+          docker manifest create sbryngelson/mfc:latest-omp-gpu \
+            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-omp-ubuntu-22.04 \
+            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-omp-ubuntu-22.04-arm
+          docker manifest push sbryngelson/mfc:latest-omp-gpu
