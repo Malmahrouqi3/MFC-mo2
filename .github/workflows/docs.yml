@@ -1,9 +1,8 @@
-name: Documentation
+name: Rendering Documentation
 
 on:
-  schedule:
-    - cron: '0 0 * * *'  # This runs every day at midnight UTC
   workflow_dispatch:
+
   push:
   pull_request:
 
@@ -34,20 +33,12 @@ jobs:
         cmake -S . -B build -G Ninja --install-prefix=$(pwd)/build/install -D MFC_DOCUMENTATION=ON
         ninja -C build install
 
-    - name: Upload Built Documentation Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: mfc-docs
-        path: build/install/docs/mfc
-        if-no-files-found: error
-        retention-days: 7
-
     # From here https://github.com/cicirello/generate-sitemap
     - name: Generate the sitemap
       id: sitemap
       uses: cicirello/generate-sitemap@v1
       with:
-        base-url-path: https://mflowcode.github.io/
+        base-url-path: https://Malmahrouqi3.github.io/mflowcode-docs
         path-to-root: build/install/docs/mfc
         include-pdf: false
         sitemap-format: txt
@@ -58,25 +49,19 @@ jobs:
         echo "url-count = ${{ steps.sitemap.outputs.url-count }}"
         echo "excluded-count = ${{ steps.sitemap.outputs.excluded-count }}"
 
-    - name: Linkcheck - Lychee
-      uses: lycheeverse/lychee-action@v2
-      with:
-        args: -c .lychee.toml build/install/docs/mfc/
-        fail: false
-
     - name: Publish Documentation
-      if:   github.repository == 'MFlowCode/MFC' && github.ref == 'refs/heads/master' &&  (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' )
       run:  |
         set +e
-        git ls-remote "${{ secrets.DOC_PUSH_URL }}" -q
+        git ls-remote "https://Malmahrouqi3:${{ secrets.TOKEN }}@github.com/Malmahrouqi3/mflowcode-docs" -q
         if [ "$?" -ne "0" ]; then exit 0; fi
         set -e
         git config --global user.name  'MFC Action'
         git config --global user.email '<>'
-        git clone "${{ secrets.DOC_PUSH_URL }}" ../www
+        git clone "https://Malmahrouqi3:${{ secrets.TOKEN }}@github.com/Malmahrouqi3/mflowcode-docs" ../www
         rm -rf ../www/*
         mv build/install/docs/mfc/* ../www/
         git -C ../www add -A
+        git -C ../www restore documentation/data.js
         git -C ../www commit -m "Docs @ ${GITHUB_SHA::7}" || true
         git -C ../www push
 
