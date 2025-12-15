@@ -38,7 +38,7 @@ jobs:
       id: sitemap
       uses: cicirello/generate-sitemap@v1
       with:
-        base-url-path: https://Malmahrouqi3.github.io/mflowcode-docs
+        base-url-path: https://Malmahrouqi3.github.io/mflowcode-docs.github.io
         path-to-root: build/install/docs/mfc
         include-pdf: false
         sitemap-format: txt
@@ -52,12 +52,12 @@ jobs:
     - name: Publish Documentation
       run:  |
         set +e
-        git ls-remote "https://Malmahrouqi3:${{ secrets.TOKEN }}@github.com/Malmahrouqi3/mflowcode-docs" -q
+        git ls-remote "https://Malmahrouqi3:${{ secrets.TOKEN }}@github.com/Malmahrouqi3/mflowcode-docs.github.io" -q
         if [ "$?" -ne "0" ]; then exit 0; fi
         set -e
         git config --global user.name  'MFC Action'
         git config --global user.email '<>'
-        git clone "https://Malmahrouqi3:${{ secrets.TOKEN }}@github.com/Malmahrouqi3/mflowcode-docs" ../www
+        git clone "https://Malmahrouqi3:${{ secrets.TOKEN }}@github.com/Malmahrouqi3/mflowcode-docs.github.io" ../www
         rm -rf ../www/*
         mv build/install/docs/mfc/* ../www/
         git -C ../www add -A
