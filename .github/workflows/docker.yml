@@ -16,9 +16,9 @@ jobs:
     strategy:
       matrix:
         config:
-            # - { name: 'cpu',  interface: 'none', runner: 'ubuntu-22.04',         base_image: 'ubuntu:22.04' }
-            # - { name: 'gpu',  interface: 'acc',  runner: 'ubuntu-22.04',         base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
-            # - { name: 'gpu',  interface: 'acc',  runner: 'ubuntu-22.04-arm',     base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
+            - { name: 'cpu',  interface: 'none', runner: 'ubuntu-22.04',         base_image: 'ubuntu:22.04' }
+            - { name: 'gpu',  interface: 'acc',  runner: 'ubuntu-22.04',         base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
+            - { name: 'gpu',  interface: 'acc',  runner: 'ubuntu-22.04-arm',     base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
             - { name: 'gpu',  interface: 'mp',  runner: 'ubuntu-22.04',         base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
             - { name: 'gpu',  interface: 'mp',  runner: 'ubuntu-22.04-arm',     base_image: 'nvcr.io/nvidia/nvhpc:23.11-devel-cuda_multi-ubuntu22.04' }
 
@@ -169,19 +169,19 @@ jobs:
       - name: Create and push multi-arch manifests
         run: |
           # CPU Manifest
-          # docker buildx imagetools create -t sbryngelson/mfc:latest-cpu \
-          #   sbryngelson/mfc:${{ github.event.inputs.tag }}-cpu
+          docker buildx imagetools create -t sbryngelson/mfc:latest-cpu \
+            sbryngelson/mfc:${{ github.event.inputs.tag }}-cpu
           
           # GPU Manifest (ACC)
-          # docker manifest create sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu \
-          #   sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04 \
-          #   sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04-arm
-          # docker manifest push sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu
+          docker manifest create sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu \
+            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04 \
+            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04-arm
+          docker manifest push sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu
 
-          # docker manifest create sbryngelson/mfc:latest-gpu \
-          #   sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04 \
-          #   sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04-arm
-          # docker manifest push sbryngelson/mfc:latest-gpu
+          docker manifest create sbryngelson/mfc:latest-gpu \
+            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04 \
+            sbryngelson/mfc:${{ github.event.inputs.tag }}-gpu-acc-ubuntu-22.04-arm
+          docker manifest push sbryngelson/mfc:latest-gpu
 
           # GPU Manifest (OMP)
           docker manifest create sbryngelson/mfc:${{ github.event.inputs.tag }}-mp-gpu \
