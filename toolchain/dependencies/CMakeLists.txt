@@ -56,7 +56,7 @@ if (MFC_HDF5)
     else()
         ExternalProject_Add(hdf5
             GIT_REPOSITORY "https://github.com/HDFGroup/hdf5"
-            GIT_TAG        hdf5-1_12_2
+            GIT_TAG        hdf5_2.0.0
             GIT_SHALLOW    ON
             GIT_PROGRESS   ON
             CMAKE_ARGS     "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
@@ -82,10 +82,8 @@ if (MFC_SILO)
 
         ExternalProject_Add(silo
             GIT_REPOSITORY "https://github.com/LLNL/Silo"
-            GIT_TAG        9af504ef4fb79153e1fbf3bdb75421b6b65f6dc4
+            GIT_TAG        4.12.0
             GIT_PROGRESS   ON
-            PATCH_COMMAND  "${GIT_EXECUTABLE}" stash
-                        && "${GIT_EXECUTABLE}" apply "${CMAKE_SOURCE_DIR}/Silo.patch"
             CMAKE_ARGS     -DSILO_ENABLE_SHARED=OFF
                            -DSILO_ENABLE_SILOCK=OFF
                            -DSILO_ENABLE_BROWSER=OFF
