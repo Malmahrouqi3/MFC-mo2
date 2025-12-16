@@ -66,6 +66,9 @@ if (MFC_HDF5)
                             -DHDF5_BUILD_UTILS=OFF
                             -DHDF5_BUILD_TOOLS=ON
                             -DHDF5_BUILD_EXAMPLES=OFF
+                            "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
+                            "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+                            "-DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER}"
         )
     endif()
 endif()
