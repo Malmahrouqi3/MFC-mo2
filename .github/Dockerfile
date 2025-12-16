@@ -18,18 +18,18 @@ RUN apt-get update -y && \
     if [ "$TARGET" != "gpu" ]; then \
         apt-get install -y \
             build-essential git make cmake gcc g++ gfortran bc \
-            python3.12 python3.12-venv \
+            python3.14 python3.14-venv \
             openmpi-bin libopenmpi-dev libfftw3-dev \
             mpich libmpich-dev; \
     else \
         apt-get install -y \
             build-essential git make cmake bc \
-            python3.12 python3.12-venv \
+            python3.14 python3.14-venv \
             libfftw3-dev \
             openmpi-bin libopenmpi-dev; \
     fi && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 && \
-    update-alternatives --set python3 /usr/bin/python3.12 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.14 1 && \
+    update-alternatives --set python3 /usr/bin/python3.14 && \
     python3 --version && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
