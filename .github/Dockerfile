@@ -28,7 +28,7 @@ RUN apt-get update -y && \
             libfftw3-dev \
             openmpi-bin libopenmpi-dev; \
     fi && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.14 1 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV OMPI_ALLOW_RUN_AS_ROOT=1
